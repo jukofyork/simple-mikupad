@@ -1,8 +1,6 @@
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -307,7 +305,6 @@ public class SimpleMikuPad {
             @Override
             public void modifyText(ModifyEvent e) {
                 autoSaveSessionState();
-                
                 // Only clear token highlighting when user manually edits (not during generation or session loading)
                 if (!isLoadingSession && generateButton.getEnabled()) {
                     clearTokenColoring();
@@ -322,8 +319,10 @@ public class SimpleMikuPad {
                 handleMouseHover(e);
             }
         });
+        
+        initializeContextMenu();
     }
-
+    
     private void handleMouseHover(MouseEvent e) {
         if (!coloringEnabled) return;
         
@@ -465,6 +464,83 @@ public class SimpleMikuPad {
         statusLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     }
     
+    /**
+     * Initializes the context menu for the prompt text area. Adds standard text
+     * editing operations such as cut, copy, and paste.
+     */
+    private void initializeContextMenu() {
+        Menu contextMenu = new Menu(promptText);
+        
+        // Cut
+        MenuItem cutItem = new MenuItem(contextMenu, SWT.PUSH);
+        cutItem.setText("Cut");
+        cutItem.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                executeTextOperation("cut");
+            }
+        });
+        
+        // Copy
+        MenuItem copyItem = new MenuItem(contextMenu, SWT.PUSH);
+        copyItem.setText("Copy");
+        copyItem.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                executeTextOperation("copy");
+            }
+        });
+        
+        // Paste
+        MenuItem pasteItem = new MenuItem(contextMenu, SWT.PUSH);
+        pasteItem.setText("Paste");
+        pasteItem.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                executeTextOperation("paste");
+            }
+        });
+        
+        // Separator
+        new MenuItem(contextMenu, SWT.SEPARATOR);
+        
+        // Select All
+        MenuItem selectAllItem = new MenuItem(contextMenu, SWT.PUSH);
+        selectAllItem.setText("Select All");
+        selectAllItem.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                executeTextOperation("selectAll");
+            }
+        });
+        
+        promptText.setMenu(contextMenu);
+    }
+
+    /**
+     * Executes a specified text operation on the prompt text area.
+     *
+     * @param operationType the type of operation to execute
+     */
+    private void executeTextOperation(String operationType) {
+        if (promptText.isDisposed()) return;
+        
+        switch (operationType) {
+            case "cut":
+                promptText.cut();
+                break;
+            case "copy":
+                promptText.copy();
+                break;
+            case "paste":
+                promptText.paste();
+                break;
+            case "selectAll":
+                promptText.selectAll();
+                break;
+        }
+    }
+
     // Sampling Parameters Methods
     
     private void openSamplingParametersDialog() {

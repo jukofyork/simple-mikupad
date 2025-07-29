@@ -23,6 +23,27 @@
             <version>3.124.0</version>
         </dependency>
         
+        <!-- JFace for UI components like MenuManager, Action, etc. -->
+        <dependency>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.jface</artifactId>
+            <version>3.29.0</version>
+        </dependency>
+        
+        <!-- Core runtime for Eclipse platform -->
+        <dependency>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.core.runtime</artifactId>
+            <version>3.26.100</version>
+        </dependency>
+        
+        <!-- Equinox common for Eclipse platform -->
+        <dependency>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.equinox.common</artifactId>
+            <version>3.17.0</version>
+        </dependency>
+        
         <!-- GSON for JSON processing -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
