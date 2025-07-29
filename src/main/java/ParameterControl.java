@@ -111,9 +111,13 @@ public class ParameterControl extends Composite {
         // Range label
         rangeLabel = new Label(this, SWT.NONE);
         if (isInteger) {
-            rangeLabel.setText("(" + (int)minValue + "-" + (int)maxValue + ")");
+            if (name.toLowerCase().contains("seed")) {
+                rangeLabel.setText("(-1 = random)");
+            } else {
+                rangeLabel.setText("(" + (int)minValue + " - " + (int)maxValue + ")");
+            }
         } else {
-            rangeLabel.setText("(" + formatDouble(minValue) + "-" + formatDouble(maxValue) + ")");
+            rangeLabel.setText("(" + formatDouble(minValue) + " - " + formatDouble(maxValue) + ")");
         }
         rangeLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
         

@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 public class SamplingParameters {
     
     // Basic parameters
+    private int seed = -1;
     private double temperature = 0.7;
     private int maxTokens = 512;
     
@@ -43,10 +44,12 @@ public class SamplingParameters {
     private int dryAllowedLength = 2;
     private String drySequenceBreakers = "\\n,.,!,?,;,:";
     
-    // Advanced
-    private String grammar = "";
-    private String stoppingStrings = "";
-    private String bannedTokens = "";
+    // Additional DRY and control parameters
+    private int dryPenaltyLastN = -1;
+    private boolean ignoreEos = false;
+    
+    // Sampler ordering
+    private String samplers = "dry;top_k;typ_p;top_p;min_p;xtc;temperature";
     
     // Sampler toggles - which samplers are enabled
     private boolean temperatureEnabled = true;
@@ -71,6 +74,7 @@ public class SamplingParameters {
      * Copy constructor
      */
     public SamplingParameters(SamplingParameters other) {
+        this.seed = other.seed;
         this.temperature = other.temperature;
         this.maxTokens = other.maxTokens;
         this.topP = other.topP;
@@ -94,9 +98,9 @@ public class SamplingParameters {
         this.dryBase = other.dryBase;
         this.dryAllowedLength = other.dryAllowedLength;
         this.drySequenceBreakers = other.drySequenceBreakers;
-        this.grammar = other.grammar;
-        this.stoppingStrings = other.stoppingStrings;
-        this.bannedTokens = other.bannedTokens;
+        this.dryPenaltyLastN = other.dryPenaltyLastN;
+        this.ignoreEos = other.ignoreEos;
+        this.samplers = other.samplers;
         
         // Copy enabled flags
         this.temperatureEnabled = other.temperatureEnabled;
@@ -115,13 +119,21 @@ public class SamplingParameters {
     }
     
     /**
-     * Converts to JSON for API requests
+     * Converts to JSON for API requests (sampling parameters only)
      */
-    public JsonObject toJson() {
+    public JsonObject toJson(AdvancedSettings advancedSettings) {
         JsonObject json = new JsonObject();
         
         // Always include basic parameters
         json.addProperty("max_tokens", maxTokens);
+        
+        // Add seed (always include, -1 means random)
+        json.addProperty("seed", seed);
+        
+        // Add ignore_eos
+        if (ignoreEos) {
+            json.addProperty("ignore_eos", true);
+        }
         
         // Add enabled samplers only
         if (temperatureEnabled) {
@@ -182,17 +194,91 @@ public class SamplingParameters {
             json.addProperty("dry_multiplier", dryMultiplier);
             json.addProperty("dry_base", dryBase);
             json.addProperty("dry_allowed_length", dryAllowedLength);
-            json.addProperty("dry_sequence_breakers", drySequenceBreakers);
+            json.addProperty("dry_penalty_last_n", dryPenaltyLastN);
+            
+            // Convert dry sequence breakers to array
+            String[] breakers = drySequenceBreakers.split(",");
+            com.google.gson.JsonArray breakersArray = new com.google.gson.JsonArray();
+            for (String breaker : breakers) {
+                String trimmed = breaker.trim();
+                if (!trimmed.isEmpty()) {
+                    // Handle escape sequences
+                    if (trimmed.equals("\\n")) {
+                        breakersArray.add("\n");
+                    } else if (trimmed.equals("\\t")) {
+                        breakersArray.add("\t");
+                    } else if (trimmed.equals("\\r")) {
+                        breakersArray.add("\r");
+                    } else {
+                        breakersArray.add(trimmed);
+                    }
+                }
+            }
+            json.add("dry_sequence_breaker", breakersArray);
+        }
+        
+        // Add samplers array (convert comma or semicolon separated to array)
+        if (!samplers.trim().isEmpty()) {
+            String[] samplerArray;
+            if (samplers.contains(";")) {
+                samplerArray = samplers.split(";");
+            } else {
+                samplerArray = samplers.split(",");
+            }
+            com.google.gson.JsonArray samplersJsonArray = new com.google.gson.JsonArray();
+            for (String sampler : samplerArray) {
+                samplersJsonArray.add(sampler.trim());
+            }
+            json.add("samplers", samplersJsonArray);
         }
         
         // Advanced features
-        if (!grammar.trim().isEmpty()) {
-            json.addProperty("grammar", grammar.trim());
+        if (advancedSettings != null && !advancedSettings.getGrammar().trim().isEmpty()) {
+            json.addProperty("grammar", advancedSettings.getGrammar().trim());
         }
         
-        if (!stoppingStrings.trim().isEmpty()) {
+        if (advancedSettings != null && !advancedSettings.getJsonSchema().trim().isEmpty()) {
+            json.addProperty("json_schema", advancedSettings.getJsonSchema().trim());
+        }
+        
+        if (advancedSettings != null && !advancedSettings.getLogitBias().trim().isEmpty()) {
+            try {
+                // Parse logit bias as JSON array
+                com.google.gson.JsonElement biasElement = com.google.gson.JsonParser.parseString(advancedSettings.getLogitBias());
+                if (biasElement.isJsonArray()) {
+                    json.add("logit_bias", biasElement.getAsJsonArray());
+                }
+            } catch (Exception e) {
+                // If parsing fails, ignore logit bias
+                System.err.println("Warning: Invalid logit bias format, ignoring: " + e.getMessage());
+            }
+        }
+        
+        // Handle banned tokens by converting to logit bias
+        if (advancedSettings != null && !advancedSettings.getBannedTokens().trim().isEmpty()) {
+            try {
+                String[] tokens = advancedSettings.getBannedTokens().split(",");
+                com.google.gson.JsonArray biasArray = new com.google.gson.JsonArray();
+                for (String token : tokens) {
+                    String trimmed = token.trim();
+                    if (!trimmed.isEmpty()) {
+                        com.google.gson.JsonArray tokenBias = new com.google.gson.JsonArray();
+                        tokenBias.add(trimmed);
+                        tokenBias.add(-100.0);
+                        biasArray.add(tokenBias);
+                    }
+                }
+                if (biasArray.size() > 0) {
+                    json.add("logit_bias", biasArray);
+                }
+            } catch (Exception e) {
+                System.err.println("Warning: Error processing banned tokens: " + e.getMessage());
+            }
+        }
+        
+        if (advancedSettings != null && !advancedSettings.getStoppingStrings().trim().isEmpty()) {
             // Parse stopping strings (comma-separated)
-            String[] stops = stoppingStrings.split(",");
+            String[] stops = advancedSettings.getStoppingStrings().split(",");
             if (stops.length > 0) {
                 com.google.gson.JsonArray stopArray = new com.google.gson.JsonArray();
                 for (String stop : stops) {
@@ -216,6 +302,7 @@ public class SamplingParameters {
     public static SamplingParameters fromJson(JsonObject json) {
         SamplingParameters params = new SamplingParameters();
         
+        if (json.has("seed")) params.seed = json.get("seed").getAsInt();
         if (json.has("temperature")) params.temperature = json.get("temperature").getAsDouble();
         if (json.has("maxTokens")) params.maxTokens = json.get("maxTokens").getAsInt();
         if (json.has("topP")) params.topP = json.get("topP").getAsDouble();
@@ -239,9 +326,9 @@ public class SamplingParameters {
         if (json.has("dryBase")) params.dryBase = json.get("dryBase").getAsDouble();
         if (json.has("dryAllowedLength")) params.dryAllowedLength = json.get("dryAllowedLength").getAsInt();
         if (json.has("drySequenceBreakers")) params.drySequenceBreakers = json.get("drySequenceBreakers").getAsString();
-        if (json.has("grammar")) params.grammar = json.get("grammar").getAsString();
-        if (json.has("stoppingStrings")) params.stoppingStrings = json.get("stoppingStrings").getAsString();
-        if (json.has("bannedTokens")) params.bannedTokens = json.get("bannedTokens").getAsString();
+        if (json.has("dryPenaltyLastN")) params.dryPenaltyLastN = json.get("dryPenaltyLastN").getAsInt();
+        if (json.has("ignoreEos")) params.ignoreEos = json.get("ignoreEos").getAsBoolean();
+        if (json.has("samplers")) params.samplers = json.get("samplers").getAsString();
         
         // Load enabled flags
         if (json.has("temperatureEnabled")) params.temperatureEnabled = json.get("temperatureEnabled").getAsBoolean();
@@ -268,6 +355,7 @@ public class SamplingParameters {
         JsonObject json = new JsonObject();
         
         // Save all parameters
+        json.addProperty("seed", seed);
         json.addProperty("temperature", temperature);
         json.addProperty("maxTokens", maxTokens);
         json.addProperty("topP", topP);
@@ -291,9 +379,9 @@ public class SamplingParameters {
         json.addProperty("dryBase", dryBase);
         json.addProperty("dryAllowedLength", dryAllowedLength);
         json.addProperty("drySequenceBreakers", drySequenceBreakers);
-        json.addProperty("grammar", grammar);
-        json.addProperty("stoppingStrings", stoppingStrings);
-        json.addProperty("bannedTokens", bannedTokens);
+        json.addProperty("dryPenaltyLastN", dryPenaltyLastN);
+        json.addProperty("ignoreEos", ignoreEos);
+        json.addProperty("samplers", samplers);
         
         // Save enabled flags
         json.addProperty("temperatureEnabled", temperatureEnabled);
@@ -314,6 +402,9 @@ public class SamplingParameters {
     }
     
     // Getters and setters for all parameters
+    public int getSeed() { return seed; }
+    public void setSeed(int seed) { this.seed = seed; }
+    
     public double getTemperature() { return temperature; }
     public void setTemperature(double temperature) { this.temperature = temperature; }
     
@@ -383,14 +474,14 @@ public class SamplingParameters {
     public String getDrySequenceBreakers() { return drySequenceBreakers; }
     public void setDrySequenceBreakers(String drySequenceBreakers) { this.drySequenceBreakers = drySequenceBreakers; }
     
-    public String getGrammar() { return grammar; }
-    public void setGrammar(String grammar) { this.grammar = grammar; }
+    public int getDryPenaltyLastN() { return dryPenaltyLastN; }
+    public void setDryPenaltyLastN(int dryPenaltyLastN) { this.dryPenaltyLastN = dryPenaltyLastN; }
     
-    public String getStoppingStrings() { return stoppingStrings; }
-    public void setStoppingStrings(String stoppingStrings) { this.stoppingStrings = stoppingStrings; }
+    public boolean isIgnoreEos() { return ignoreEos; }
+    public void setIgnoreEos(boolean ignoreEos) { this.ignoreEos = ignoreEos; }
     
-    public String getBannedTokens() { return bannedTokens; }
-    public void setBannedTokens(String bannedTokens) { this.bannedTokens = bannedTokens; }
+    public String getSamplers() { return samplers; }
+    public void setSamplers(String samplers) { this.samplers = samplers; }
     
     // Enabled flag getters and setters
     public boolean isTemperatureEnabled() { return temperatureEnabled; }

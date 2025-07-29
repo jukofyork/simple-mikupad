@@ -58,12 +58,13 @@ public class GenerationManager {
         
         Session currentSession = app.getSessionManager().getCurrentSession();
         SamplingParameters samplingParams = currentSession.getSamplingParams();
+        AdvancedSettings advancedSettings = currentSession.getAdvancedSettings();
         
         app.updateStatus("Generating completion...");
         
         CompletableFuture.runAsync(() -> {
             try {
-                JsonObject request = samplingParams.toJson();
+                JsonObject request = samplingParams.toJson(advancedSettings);
                 request.addProperty("prompt", prompt);
                 request.addProperty("stream", true);
                 request.addProperty("logprobs", 10);
