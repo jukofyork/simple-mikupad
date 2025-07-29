@@ -4,11 +4,12 @@
  */
 public class AdvancedSettings {
     
-    private String grammar = "";
-    private String jsonSchema = "";
-    private String logitBias = "";
-    private String stoppingStrings = "";
-    private String bannedTokens = "";
+    private String grammar = Constants.DEFAULT_GRAMMAR;
+    private String jsonSchema = Constants.DEFAULT_JSON_SCHEMA;
+    private String logitBias = Constants.DEFAULT_LOGIT_BIAS;
+    private String stoppingStrings = Constants.DEFAULT_STOPPING_STRINGS;
+    private String bannedTokens = Constants.DEFAULT_BANNED_TOKENS;
+    private boolean ignoreEos = Constants.DEFAULT_IGNORE_EOS;
     
     public AdvancedSettings() {
         // Default constructor
@@ -23,6 +24,7 @@ public class AdvancedSettings {
         this.logitBias = other.logitBias;
         this.stoppingStrings = other.stoppingStrings;
         this.bannedTokens = other.bannedTokens;
+        this.ignoreEos = other.ignoreEos;
     }
     
     /**
@@ -36,6 +38,7 @@ public class AdvancedSettings {
         if (json.has("logitBias")) settings.logitBias = json.get("logitBias").getAsString();
         if (json.has("stoppingStrings")) settings.stoppingStrings = json.get("stoppingStrings").getAsString();
         if (json.has("bannedTokens")) settings.bannedTokens = json.get("bannedTokens").getAsString();
+        if (json.has("ignoreEos")) settings.ignoreEos = json.get("ignoreEos").getAsBoolean();
         
         return settings;
     }
@@ -51,6 +54,7 @@ public class AdvancedSettings {
         json.addProperty("logitBias", logitBias);
         json.addProperty("stoppingStrings", stoppingStrings);
         json.addProperty("bannedTokens", bannedTokens);
+        json.addProperty("ignoreEos", ignoreEos);
         
         return json;
     }
@@ -117,4 +121,7 @@ public class AdvancedSettings {
     
     public String getBannedTokens() { return bannedTokens; }
     public void setBannedTokens(String bannedTokens) { this.bannedTokens = bannedTokens; }
+    
+    public boolean isIgnoreEos() { return ignoreEos; }
+    public void setIgnoreEos(boolean ignoreEos) { this.ignoreEos = ignoreEos; }
 }

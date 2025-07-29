@@ -113,6 +113,8 @@ public class ParameterControl extends Composite {
         if (isInteger) {
             if (name.toLowerCase().contains("seed")) {
                 rangeLabel.setText("(-1 = random)");
+            } else if (name.toLowerCase().contains("repeat last n")) {
+                rangeLabel.setText("(0=disabled, -1=ctx_size)");
             } else {
                 rangeLabel.setText("(" + (int)minValue + " - " + (int)maxValue + ")");
             }

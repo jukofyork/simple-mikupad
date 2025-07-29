@@ -45,7 +45,6 @@ public class SamplingParametersDialog {
     private ParameterControl dryAllowedLengthControl;
     private Text drySequenceBreakersText;
     private ParameterControl dryPenaltyLastNControl;
-    private Button ignoreEosCheck;
     
     public SamplingParametersDialog(Shell parent, SamplingParameters parameters) {
         this.parentShell = parent;
@@ -93,7 +92,6 @@ public class SamplingParametersDialog {
         content.setLayout(new GridLayout(1, false));
         
         createBasicGroup(content);
-        createTopSamplingGroup(content);
         createRepetitionGroup(content);
         createAdvancedGroup(content);
         createButtonBar();
@@ -108,43 +106,19 @@ public class SamplingParametersDialog {
         group.setLayout(new GridLayout(1, false));
         group.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
         
-        seedControl = new ParameterControl(group, "Seed", -1, -1, Integer.MAX_VALUE, true);
-        temperatureControl = new ParameterControl(group, "Temperature", 0.7, 0.0, 5.0, 1, true);
-        maxTokensControl = new ParameterControl(group, "Max Tokens", 512, 1, 8192, true);
-        
-        // Samplers order
-        Composite samplersComp = new Composite(group, SWT.NONE);
-        samplersComp.setLayout(new GridLayout(2, false));
-        samplersComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-        
-        new Label(samplersComp, SWT.NONE).setText("Samplers Order:");
-        samplersText = new Text(samplersComp, SWT.BORDER);
-        samplersText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-        samplersText.setText("dry;top_k;typ_p;top_p;min_p;xtc;temperature");
-        samplersText.setToolTipText("Semicolon or comma separated sampler names");
+        seedControl = new ParameterControl(group, "Seed", Constants.DEFAULT_SEED, Constants.SEED_MIN, Constants.SEED_MAX, true);
+        temperatureControl = new ParameterControl(group, "Temperature", Constants.DEFAULT_TEMPERATURE, Constants.TEMPERATURE_MIN, Constants.TEMPERATURE_MAX, 1, Constants.DEFAULT_TEMPERATURE_ENABLED);
+        topKControl = new ParameterControl(group, "Top-K", Constants.DEFAULT_TOP_K, Constants.TOP_K_MIN, Constants.TOP_K_MAX, Constants.DEFAULT_TOP_K_ENABLED);
+        topPControl = new ParameterControl(group, "Top-P", Constants.DEFAULT_TOP_P, Constants.TOP_P_MIN, Constants.TOP_P_MAX, 1, Constants.DEFAULT_TOP_P_ENABLED);
+        minPControl = new ParameterControl(group, "Min-P", Constants.DEFAULT_MIN_P, Constants.MIN_P_MIN, Constants.MIN_P_MAX, 1, Constants.DEFAULT_MIN_P_ENABLED);
+        maxTokensControl = new ParameterControl(group, "Max Tokens", Constants.DEFAULT_MAX_TOKENS, Constants.MAX_TOKENS_MIN, Constants.MAX_TOKENS_MAX, Constants.DEFAULT_MAX_TOKENS_ENABLED);
         
         setupChangeListener(seedControl);
         setupChangeListener(temperatureControl);
         setupChangeListener(maxTokensControl);
-    }
-    
-    private void createTopSamplingGroup(Composite parent) {
-        Group group = new Group(parent, SWT.NONE);
-        group.setText("Top Sampling");
-        group.setLayout(new GridLayout(1, false));
-        group.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-        
-        topPControl = new ParameterControl(group, "Top-P", 0.95, 0.0, 1.0, 1, true);
-        topKControl = new ParameterControl(group, "Top-K", 40, 0, 200, true);
-        minPControl = new ParameterControl(group, "Min-P", 0.0, 0.0, 1.0, 1, false);
-        typicalPControl = new ParameterControl(group, "Typical-P", 1.0, 0.0, 1.0, 1, false);
-        tfsZControl = new ParameterControl(group, "TFS-Z", 1.0, 0.0, 1.0, 1, false);
-        
         setupChangeListener(topPControl);
         setupChangeListener(topKControl);
         setupChangeListener(minPControl);
-        setupChangeListener(typicalPControl);
-        setupChangeListener(tfsZControl);
     }
     
     private void createRepetitionGroup(Composite parent) {
@@ -153,19 +127,14 @@ public class SamplingParametersDialog {
         group.setLayout(new GridLayout(1, false));
         group.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
         
-        repeatPenaltyControl = new ParameterControl(group, "Repeat Penalty", 1.1, 0.0, 2.0, 1, true);
-        repeatLastNControl = new ParameterControl(group, "Repeat Last N", 256, 0, 2048, true);
-        
+        repeatPenaltyControl = new ParameterControl(group, "Repeat Penalty", Constants.DEFAULT_REPEAT_PENALTY, Constants.REPEAT_PENALTY_MIN, Constants.REPEAT_PENALTY_MAX, 1, Constants.DEFAULT_REPEAT_PENALTY_ENABLED);
+        presencePenaltyControl = new ParameterControl(group, "Presence Penalty", Constants.DEFAULT_PRESENCE_PENALTY, Constants.PRESENCE_PENALTY_MIN, Constants.PRESENCE_PENALTY_MAX, 1, Constants.DEFAULT_PRESENCE_PENALTY_ENABLED);
+        frequencyPenaltyControl = new ParameterControl(group, "Frequency Penalty", Constants.DEFAULT_FREQUENCY_PENALTY, Constants.FREQUENCY_PENALTY_MIN, Constants.FREQUENCY_PENALTY_MAX, 1, Constants.DEFAULT_FREQUENCY_PENALTY_ENABLED);
+        repeatLastNControl = new ParameterControl(group, "Repeat Last N", Constants.DEFAULT_REPEAT_LAST_N, Constants.REPEAT_LAST_N_MIN, Constants.REPEAT_LAST_N_MAX, Constants.DEFAULT_REPEAT_LAST_N_ENABLED);
+
         penalizeNlCheck = new Button(group, SWT.CHECK);
         penalizeNlCheck.setText("Penalize Newlines");
         penalizeNlCheck.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-        
-        ignoreEosCheck = new Button(group, SWT.CHECK);
-        ignoreEosCheck.setText("Ignore End of Stream");
-        ignoreEosCheck.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-        
-        presencePenaltyControl = new ParameterControl(group, "Presence Penalty", 0.0, -2.0, 2.0, 1, false);
-        frequencyPenaltyControl = new ParameterControl(group, "Frequency Penalty", 0.0, -2.0, 2.0, 1, false);
         
         setupChangeListener(repeatPenaltyControl);
         setupChangeListener(repeatLastNControl);
@@ -181,32 +150,35 @@ public class SamplingParametersDialog {
         
         // Mirostat
         Composite mirostatComp = new Composite(group, SWT.NONE);
-        mirostatComp.setLayout(new GridLayout(3, false));
+        mirostatComp.setLayout(new GridLayout(2, false));
         mirostatComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         
         new Label(mirostatComp, SWT.NONE).setText("Mirostat:");
         mirostatCombo = new Combo(mirostatComp, SWT.READ_ONLY);
         mirostatCombo.setItems(new String[]{"Disabled", "Mirostat v1", "Mirostat v2"});
-        mirostatCombo.select(0);
+        mirostatCombo.select(Constants.DEFAULT_MIROSTAT);
         mirostatCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-        new Label(mirostatComp, SWT.NONE).setText("(0 = off, 1 = v1, 2 = v2)");
         
-        mirostatTauControl = new ParameterControl(group, "Mirostat Tau", 5.0, 0.1, 10.0, 1, false);
-        mirostatEtaControl = new ParameterControl(group, "Mirostat Eta", 0.1, 0.01, 1.0, 1, false);
+        mirostatTauControl = new ParameterControl(group, "Mirostat Tau", Constants.DEFAULT_MIROSTAT_TAU, Constants.MIROSTAT_TAU_MIN, Constants.MIROSTAT_TAU_MAX, 1, Constants.DEFAULT_MIROSTAT_ENABLED);
+        mirostatEtaControl = new ParameterControl(group, "Mirostat Eta", Constants.DEFAULT_MIROSTAT_ETA, Constants.MIROSTAT_ETA_MIN, Constants.MIROSTAT_ETA_MAX, 1, Constants.DEFAULT_MIROSTAT_ENABLED);
+        
+        // Advanced sampling methods (moved after Mirostat)
+        typicalPControl = new ParameterControl(group, "Typical-P", Constants.DEFAULT_TYPICAL_P, Constants.TYPICAL_P_MIN, Constants.TYPICAL_P_MAX, 1, Constants.DEFAULT_TYPICAL_P_ENABLED);
+        tfsZControl = new ParameterControl(group, "TFS-Z", Constants.DEFAULT_TFS_Z, Constants.TFS_Z_MIN, Constants.TFS_Z_MAX, 1, Constants.DEFAULT_TFS_Z_ENABLED);
         
         // Dynamic Temperature
-        dynatempRangeControl = new ParameterControl(group, "Dynatemp Range", 0.0, 0.0, 5.0, 1, false);
-        dynatempExponentControl = new ParameterControl(group, "Dynatemp Exponent", 1.0, 0.1, 5.0, 1, false);
+        dynatempRangeControl = new ParameterControl(group, "Dynatemp Range", Constants.DEFAULT_DYNATEMP_RANGE, Constants.DYNATEMP_RANGE_MIN, Constants.DYNATEMP_RANGE_MAX, 1, Constants.DEFAULT_DYNATEMP_ENABLED);
+        dynatempExponentControl = new ParameterControl(group, "Dynatemp Exponent", Constants.DEFAULT_DYNATEMP_EXPONENT, Constants.DYNATEMP_EXPONENT_MIN, Constants.DYNATEMP_EXPONENT_MAX, 1, Constants.DEFAULT_DYNATEMP_ENABLED);
         
         // XTC
-        xtcThresholdControl = new ParameterControl(group, "XTC Threshold", 0.1, 0.0, 1.0, 1, false);
-        xtcProbabilityControl = new ParameterControl(group, "XTC Probability", 0.0, 0.0, 1.0, 1, false);
+        xtcThresholdControl = new ParameterControl(group, "XTC Threshold", Constants.DEFAULT_XTC_THRESHOLD, Constants.XTC_THRESHOLD_MIN, Constants.XTC_THRESHOLD_MAX, 1, Constants.DEFAULT_XTC_ENABLED);
+        xtcProbabilityControl = new ParameterControl(group, "XTC Probability", Constants.DEFAULT_XTC_PROBABILITY, Constants.XTC_PROBABILITY_MIN, Constants.XTC_PROBABILITY_MAX, 1, Constants.DEFAULT_XTC_ENABLED);
         
         // DRY
-        dryMultiplierControl = new ParameterControl(group, "DRY Multiplier", 0.0, 0.0, 5.0, 1, false);
-        dryBaseControl = new ParameterControl(group, "DRY Base", 1.75, 1.0, 4.0, 1, false);
-        dryAllowedLengthControl = new ParameterControl(group, "DRY Allowed Length", 2, 1, 20, false);
-        dryPenaltyLastNControl = new ParameterControl(group, "DRY Penalty Last N", -1, -1, 4096, false);
+        dryMultiplierControl = new ParameterControl(group, "DRY Multiplier", Constants.DEFAULT_DRY_MULTIPLIER, Constants.DRY_MULTIPLIER_MIN, Constants.DRY_MULTIPLIER_MAX, 1, Constants.DEFAULT_DRY_ENABLED);
+        dryBaseControl = new ParameterControl(group, "DRY Base", Constants.DEFAULT_DRY_BASE, Constants.DRY_BASE_MIN, Constants.DRY_BASE_MAX, 1, Constants.DEFAULT_DRY_ENABLED);
+        dryAllowedLengthControl = new ParameterControl(group, "DRY Allowed Length", Constants.DEFAULT_DRY_ALLOWED_LENGTH, Constants.DRY_ALLOWED_LENGTH_MIN, Constants.DRY_ALLOWED_LENGTH_MAX, Constants.DEFAULT_DRY_ENABLED);
+        dryPenaltyLastNControl = new ParameterControl(group, "DRY Penalty Last N", Constants.DEFAULT_DRY_PENALTY_LAST_N, Constants.DRY_PENALTY_LAST_N_MIN, Constants.DRY_PENALTY_LAST_N_MAX, Constants.DEFAULT_DRY_ENABLED);
         
         Composite drySeqComp = new Composite(group, SWT.NONE);
         drySeqComp.setLayout(new GridLayout(2, false));
@@ -215,10 +187,24 @@ public class SamplingParametersDialog {
         new Label(drySeqComp, SWT.NONE).setText("DRY Sequence Breakers:");
         drySequenceBreakersText = new Text(drySeqComp, SWT.BORDER);
         drySequenceBreakersText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-        drySequenceBreakersText.setText("\\n,.,!,?,;,:");
+        drySequenceBreakersText.setText(Constants.DEFAULT_DRY_SEQUENCE_BREAKERS);
+        drySequenceBreakersText.setToolTipText("Space-delimited sequence breakers (e.g., \\n , . ! ? ; :)");
+        
+        // Samplers order (moved to bottom)
+        Composite samplersComp = new Composite(group, SWT.NONE);
+        samplersComp.setLayout(new GridLayout(2, false));
+        samplersComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+        
+        new Label(samplersComp, SWT.NONE).setText("Samplers Order:");
+        samplersText = new Text(samplersComp, SWT.BORDER);
+        samplersText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+        samplersText.setText(Constants.DEFAULT_SAMPLERS);
+        samplersText.setToolTipText("Space-delimited sampler names (e.g., dry top_k typ_p top_p min_p xtc temperature)");
         
         setupChangeListener(mirostatTauControl);
         setupChangeListener(mirostatEtaControl);
+        setupChangeListener(typicalPControl);
+        setupChangeListener(tfsZControl);
         setupChangeListener(dynatempRangeControl);
         setupChangeListener(dynatempExponentControl);
         setupChangeListener(xtcThresholdControl);
@@ -309,9 +295,6 @@ public class SamplingParametersDialog {
         temperatureControl.setDoubleValue(parameters.getTemperature());
         temperatureControl.setEnabled(parameters.isTemperatureEnabled());
         
-        ignoreEosCheck.setSelection(parameters.isIgnoreEos());
-        maxTokensControl.setIntValue(parameters.getMaxTokens());
-        
         topPControl.setDoubleValue(parameters.getTopP());
         topPControl.setEnabled(parameters.isTopPEnabled());
         
@@ -320,6 +303,9 @@ public class SamplingParametersDialog {
         
         minPControl.setDoubleValue(parameters.getMinP());
         minPControl.setEnabled(parameters.isMinPEnabled());
+        
+        maxTokensControl.setIntValue(parameters.getMaxTokens());
+        maxTokensControl.setEnabled(parameters.isMaxTokensEnabled());
         
         typicalPControl.setDoubleValue(parameters.getTypicalP());
         typicalPControl.setEnabled(parameters.isTypicalPEnabled());
@@ -331,13 +317,15 @@ public class SamplingParametersDialog {
         repeatPenaltyControl.setEnabled(parameters.isRepeatPenaltyEnabled());
         
         repeatLastNControl.setIntValue(parameters.getRepeatLastN());
-        penalizeNlCheck.setSelection(parameters.isPenalizeNl());
+        repeatLastNControl.setEnabled(parameters.isRepeatLastNEnabled());
         
         presencePenaltyControl.setDoubleValue(parameters.getPresencePenalty());
         presencePenaltyControl.setEnabled(parameters.isPresencePenaltyEnabled());
         
         frequencyPenaltyControl.setDoubleValue(parameters.getFrequencyPenalty());
         frequencyPenaltyControl.setEnabled(parameters.isFrequencyPenaltyEnabled());
+        
+        penalizeNlCheck.setSelection(parameters.isPenalizeNl());
         
         mirostatCombo.select(parameters.getMirostat());
         mirostatTauControl.setDoubleValue(parameters.getMirostatTau());
@@ -372,8 +360,8 @@ public class SamplingParametersDialog {
         parameters.setTemperature(temperatureControl.getDoubleValue());
         parameters.setTemperatureEnabled(temperatureControl.isEnabled());
         
-        parameters.setIgnoreEos(ignoreEosCheck.getSelection());
         parameters.setMaxTokens(maxTokensControl.getIntValue());
+        parameters.setMaxTokensEnabled(maxTokensControl.isEnabled());
         
         parameters.setTopP(topPControl.getDoubleValue());
         parameters.setTopPEnabled(topPControl.isEnabled());
@@ -394,13 +382,15 @@ public class SamplingParametersDialog {
         parameters.setRepeatPenaltyEnabled(repeatPenaltyControl.isEnabled());
         
         parameters.setRepeatLastN(repeatLastNControl.getIntValue());
-        parameters.setPenalizeNl(penalizeNlCheck.getSelection());
+        parameters.setRepeatLastNEnabled(repeatLastNControl.isEnabled());
         
         parameters.setPresencePenalty(presencePenaltyControl.getDoubleValue());
         parameters.setPresencePenaltyEnabled(presencePenaltyControl.isEnabled());
         
         parameters.setFrequencyPenalty(frequencyPenaltyControl.getDoubleValue());
         parameters.setFrequencyPenaltyEnabled(frequencyPenaltyControl.isEnabled());
+        
+        parameters.setPenalizeNl(penalizeNlCheck.getSelection());
         
         parameters.setMirostat(mirostatCombo.getSelectionIndex());
         parameters.setMirostatEnabled(mirostatCombo.getSelectionIndex() > 0);
@@ -444,6 +434,15 @@ public class SamplingParametersDialog {
                 messageBox.open();
                 return false;
             }
+        }
+        
+        // Validate samplers
+        if (!Constants.validateSamplers(samplersText.getText())) {
+            MessageBox messageBox = new MessageBox(shell, SWT.ERROR | SWT.OK);
+            messageBox.setMessage("Invalid sampler names. Only these are allowed: dry, top_k, typ_p, top_p, min_p, xtc, temperature");
+            messageBox.setText("Validation Error");
+            messageBox.open();
+            return false;
         }
         
         return true;

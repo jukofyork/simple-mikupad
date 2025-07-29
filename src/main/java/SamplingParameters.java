@@ -7,64 +7,67 @@ import com.google.gson.JsonObject;
 public class SamplingParameters {
     
     // Basic parameters
-    private int seed = -1;
-    private double temperature = 0.7;
-    private int maxTokens = 512;
+    private int seed = Constants.DEFAULT_SEED;
+    private double temperature = Constants.DEFAULT_TEMPERATURE;
+    private int maxTokens = Constants.DEFAULT_MAX_TOKENS;
     
-    // Top sampling
-    private double topP = 0.95;
-    private int topK = 40;
-    private double minP = 0.0;
-    private double typicalP = 1.0;
-    private double tfsZ = 1.0;
+    // Basic sampling
+    private double topP = Constants.DEFAULT_TOP_P;
+    private double minP = Constants.DEFAULT_MIN_P;
+    private int topK = Constants.DEFAULT_TOP_K;
+    
+    // Advanced sampling
+    private double typicalP = Constants.DEFAULT_TYPICAL_P;
+    private double tfsZ = Constants.DEFAULT_TFS_Z;
     
     // Repetition control
-    private double repeatPenalty = 1.1;
-    private int repeatLastN = 256;
-    private boolean penalizeNl = false;
-    private double presencePenalty = 0.0;
-    private double frequencyPenalty = 0.0;
+    private double repeatPenalty = Constants.DEFAULT_REPEAT_PENALTY;
+    private double presencePenalty = Constants.DEFAULT_PRESENCE_PENALTY;
+    private double frequencyPenalty = Constants.DEFAULT_FREQUENCY_PENALTY;
+    private int repeatLastN = Constants.DEFAULT_REPEAT_LAST_N;
+    private boolean penalizeNl = Constants.DEFAULT_PENALIZE_NL;
     
     // Mirostat
-    private int mirostat = 0; // 0=disabled, 1=v1, 2=v2
-    private double mirostatTau = 5.0;
-    private double mirostatEta = 0.1;
+    private int mirostat = Constants.DEFAULT_MIROSTAT; // 0=disabled, 1=v1, 2=v2
+    private double mirostatTau = Constants.DEFAULT_MIROSTAT_TAU;
+    private double mirostatEta = Constants.DEFAULT_MIROSTAT_ETA;
     
     // Dynamic Temperature
-    private double dynatempRange = 0.0;
-    private double dynatempExponent = 1.0;
+    private double dynatempRange = Constants.DEFAULT_DYNATEMP_RANGE;
+    private double dynatempExponent = Constants.DEFAULT_DYNATEMP_EXPONENT;
     
     // XTC Sampling
-    private double xtcThreshold = 0.1;
-    private double xtcProbability = 0.0;
+    private double xtcThreshold = Constants.DEFAULT_XTC_THRESHOLD;
+    private double xtcProbability = Constants.DEFAULT_XTC_PROBABILITY;
     
     // DRY Sampling
-    private double dryMultiplier = 0.0;
-    private double dryBase = 1.75;
-    private int dryAllowedLength = 2;
-    private String drySequenceBreakers = "\\n,.,!,?,;,:";
+    private double dryMultiplier = Constants.DEFAULT_DRY_MULTIPLIER;
+    private double dryBase = Constants.DEFAULT_DRY_BASE;
+    private int dryAllowedLength = Constants.DEFAULT_DRY_ALLOWED_LENGTH;
+    private String drySequenceBreakers = Constants.DEFAULT_DRY_SEQUENCE_BREAKERS;
     
     // Additional DRY and control parameters
-    private int dryPenaltyLastN = -1;
-    private boolean ignoreEos = false;
+    private int dryPenaltyLastN = Constants.DEFAULT_DRY_PENALTY_LAST_N;
     
     // Sampler ordering
-    private String samplers = "dry;top_k;typ_p;top_p;min_p;xtc;temperature";
+    private String samplers = Constants.DEFAULT_SAMPLERS;
     
     // Sampler toggles - which samplers are enabled
-    private boolean temperatureEnabled = true;
-    private boolean topPEnabled = true;
-    private boolean topKEnabled = true;
-    private boolean minPEnabled = false;
-    private boolean typicalPEnabled = false;
-    private boolean tfsZEnabled = false;
-    private boolean repeatPenaltyEnabled = true;
-    private boolean presencePenaltyEnabled = false;
-    private boolean frequencyPenaltyEnabled = false;
-    private boolean mirostatEnabled = false;
-    private boolean dynatempEnabled = false;
-    private boolean xtcEnabled = false;
-    private boolean dryEnabled = false;
+    private boolean temperatureEnabled = Constants.DEFAULT_TEMPERATURE_ENABLED;
+    private boolean topPEnabled = Constants.DEFAULT_TOP_P_ENABLED;
+    private boolean topKEnabled = Constants.DEFAULT_TOP_K_ENABLED;
+    private boolean minPEnabled = Constants.DEFAULT_MIN_P_ENABLED;
+    private boolean typicalPEnabled = Constants.DEFAULT_TYPICAL_P_ENABLED;
+    private boolean tfsZEnabled = Constants.DEFAULT_TFS_Z_ENABLED;
+    private boolean repeatPenaltyEnabled = Constants.DEFAULT_REPEAT_PENALTY_ENABLED;
+    private boolean repeatLastNEnabled = Constants.DEFAULT_REPEAT_LAST_N_ENABLED;
+    private boolean presencePenaltyEnabled = Constants.DEFAULT_PRESENCE_PENALTY_ENABLED;
+    private boolean frequencyPenaltyEnabled = Constants.DEFAULT_FREQUENCY_PENALTY_ENABLED;
+    private boolean mirostatEnabled = Constants.DEFAULT_MIROSTAT_ENABLED;
+    private boolean dynatempEnabled = Constants.DEFAULT_DYNATEMP_ENABLED;
+    private boolean xtcEnabled = Constants.DEFAULT_XTC_ENABLED;
+    private boolean dryEnabled = Constants.DEFAULT_DRY_ENABLED;
+    private boolean maxTokensEnabled = Constants.DEFAULT_MAX_TOKENS_ENABLED;
     
     public SamplingParameters() {
         // Default constructor with sensible defaults
@@ -99,7 +102,6 @@ public class SamplingParameters {
         this.dryAllowedLength = other.dryAllowedLength;
         this.drySequenceBreakers = other.drySequenceBreakers;
         this.dryPenaltyLastN = other.dryPenaltyLastN;
-        this.ignoreEos = other.ignoreEos;
         this.samplers = other.samplers;
         
         // Copy enabled flags
@@ -110,12 +112,14 @@ public class SamplingParameters {
         this.typicalPEnabled = other.typicalPEnabled;
         this.tfsZEnabled = other.tfsZEnabled;
         this.repeatPenaltyEnabled = other.repeatPenaltyEnabled;
+        this.repeatLastNEnabled = other.repeatLastNEnabled;
         this.presencePenaltyEnabled = other.presencePenaltyEnabled;
         this.frequencyPenaltyEnabled = other.frequencyPenaltyEnabled;
         this.mirostatEnabled = other.mirostatEnabled;
         this.dynatempEnabled = other.dynatempEnabled;
         this.xtcEnabled = other.xtcEnabled;
         this.dryEnabled = other.dryEnabled;
+        this.maxTokensEnabled = other.maxTokensEnabled;
     }
     
     /**
@@ -124,14 +128,16 @@ public class SamplingParameters {
     public JsonObject toJson(AdvancedSettings advancedSettings) {
         JsonObject json = new JsonObject();
         
-        // Always include basic parameters
-        json.addProperty("max_tokens", maxTokens);
+        // Add max_tokens only if enabled
+        if (maxTokensEnabled) {
+            json.addProperty("max_tokens", maxTokens);
+        }
         
         // Add seed (always include, -1 means random)
         json.addProperty("seed", seed);
         
         // Add ignore_eos
-        if (ignoreEos) {
+        if (advancedSettings != null && advancedSettings.isIgnoreEos()) {
             json.addProperty("ignore_eos", true);
         }
         
@@ -162,7 +168,9 @@ public class SamplingParameters {
         
         if (repeatPenaltyEnabled) {
             json.addProperty("repeat_penalty", repeatPenalty);
-            json.addProperty("repeat_last_n", repeatLastN);
+            if (repeatLastNEnabled) {
+                json.addProperty("repeat_last_n", repeatLastN);
+            }
             json.addProperty("penalize_nl", penalizeNl);
         }
         
@@ -196,40 +204,32 @@ public class SamplingParameters {
             json.addProperty("dry_allowed_length", dryAllowedLength);
             json.addProperty("dry_penalty_last_n", dryPenaltyLastN);
             
-            // Convert dry sequence breakers to array
-            String[] breakers = drySequenceBreakers.split(",");
+            // Parse space-delimited dry sequence breakers
+            String[] breakers = Constants.parseSpaceDelimited(drySequenceBreakers);
+            
             com.google.gson.JsonArray breakersArray = new com.google.gson.JsonArray();
             for (String breaker : breakers) {
-                String trimmed = breaker.trim();
-                if (!trimmed.isEmpty()) {
-                    // Handle escape sequences
-                    if (trimmed.equals("\\n")) {
-                        breakersArray.add("\n");
-                    } else if (trimmed.equals("\\t")) {
-                        breakersArray.add("\t");
-                    } else if (trimmed.equals("\\r")) {
-                        breakersArray.add("\r");
-                    } else {
-                        breakersArray.add(trimmed);
-                    }
-                }
+                // Handle escape sequences
+                String processed = Constants.processEscapeSequences(breaker);
+                breakersArray.add(processed);
             }
-            json.add("dry_sequence_breaker", breakersArray);
+            if (breakersArray.size() > 0) {
+                json.add("dry_sequence_breaker", breakersArray);
+            }
         }
         
-        // Add samplers array (convert comma or semicolon separated to array)
+        // Add samplers array (space-delimited)
         if (!samplers.trim().isEmpty()) {
-            String[] samplerArray;
-            if (samplers.contains(";")) {
-                samplerArray = samplers.split(";");
-            } else {
-                samplerArray = samplers.split(",");
-            }
+            String[] samplerArray = Constants.parseSpaceDelimited(samplers);
+            
             com.google.gson.JsonArray samplersJsonArray = new com.google.gson.JsonArray();
             for (String sampler : samplerArray) {
-                samplersJsonArray.add(sampler.trim());
+                samplersJsonArray.add(sampler);
             }
-            json.add("samplers", samplersJsonArray);
+            
+            if (samplersJsonArray.size() > 0) {
+                json.add("samplers", samplersJsonArray);
+            }
         }
         
         // Advanced features
@@ -327,7 +327,6 @@ public class SamplingParameters {
         if (json.has("dryAllowedLength")) params.dryAllowedLength = json.get("dryAllowedLength").getAsInt();
         if (json.has("drySequenceBreakers")) params.drySequenceBreakers = json.get("drySequenceBreakers").getAsString();
         if (json.has("dryPenaltyLastN")) params.dryPenaltyLastN = json.get("dryPenaltyLastN").getAsInt();
-        if (json.has("ignoreEos")) params.ignoreEos = json.get("ignoreEos").getAsBoolean();
         if (json.has("samplers")) params.samplers = json.get("samplers").getAsString();
         
         // Load enabled flags
@@ -338,12 +337,14 @@ public class SamplingParameters {
         if (json.has("typicalPEnabled")) params.typicalPEnabled = json.get("typicalPEnabled").getAsBoolean();
         if (json.has("tfsZEnabled")) params.tfsZEnabled = json.get("tfsZEnabled").getAsBoolean();
         if (json.has("repeatPenaltyEnabled")) params.repeatPenaltyEnabled = json.get("repeatPenaltyEnabled").getAsBoolean();
+        if (json.has("repeatLastNEnabled")) params.repeatLastNEnabled = json.get("repeatLastNEnabled").getAsBoolean();
         if (json.has("presencePenaltyEnabled")) params.presencePenaltyEnabled = json.get("presencePenaltyEnabled").getAsBoolean();
         if (json.has("frequencyPenaltyEnabled")) params.frequencyPenaltyEnabled = json.get("frequencyPenaltyEnabled").getAsBoolean();
         if (json.has("mirostatEnabled")) params.mirostatEnabled = json.get("mirostatEnabled").getAsBoolean();
         if (json.has("dynatempEnabled")) params.dynatempEnabled = json.get("dynatempEnabled").getAsBoolean();
         if (json.has("xtcEnabled")) params.xtcEnabled = json.get("xtcEnabled").getAsBoolean();
         if (json.has("dryEnabled")) params.dryEnabled = json.get("dryEnabled").getAsBoolean();
+        if (json.has("maxTokensEnabled")) params.maxTokensEnabled = json.get("maxTokensEnabled").getAsBoolean();
         
         return params;
     }
@@ -380,7 +381,6 @@ public class SamplingParameters {
         json.addProperty("dryAllowedLength", dryAllowedLength);
         json.addProperty("drySequenceBreakers", drySequenceBreakers);
         json.addProperty("dryPenaltyLastN", dryPenaltyLastN);
-        json.addProperty("ignoreEos", ignoreEos);
         json.addProperty("samplers", samplers);
         
         // Save enabled flags
@@ -391,12 +391,14 @@ public class SamplingParameters {
         json.addProperty("typicalPEnabled", typicalPEnabled);
         json.addProperty("tfsZEnabled", tfsZEnabled);
         json.addProperty("repeatPenaltyEnabled", repeatPenaltyEnabled);
+        json.addProperty("repeatLastNEnabled", repeatLastNEnabled);
         json.addProperty("presencePenaltyEnabled", presencePenaltyEnabled);
         json.addProperty("frequencyPenaltyEnabled", frequencyPenaltyEnabled);
         json.addProperty("mirostatEnabled", mirostatEnabled);
         json.addProperty("dynatempEnabled", dynatempEnabled);
         json.addProperty("xtcEnabled", xtcEnabled);
         json.addProperty("dryEnabled", dryEnabled);
+        json.addProperty("maxTokensEnabled", maxTokensEnabled);
         
         return json;
     }
@@ -477,9 +479,6 @@ public class SamplingParameters {
     public int getDryPenaltyLastN() { return dryPenaltyLastN; }
     public void setDryPenaltyLastN(int dryPenaltyLastN) { this.dryPenaltyLastN = dryPenaltyLastN; }
     
-    public boolean isIgnoreEos() { return ignoreEos; }
-    public void setIgnoreEos(boolean ignoreEos) { this.ignoreEos = ignoreEos; }
-    
     public String getSamplers() { return samplers; }
     public void setSamplers(String samplers) { this.samplers = samplers; }
     
@@ -505,6 +504,9 @@ public class SamplingParameters {
     public boolean isRepeatPenaltyEnabled() { return repeatPenaltyEnabled; }
     public void setRepeatPenaltyEnabled(boolean enabled) { this.repeatPenaltyEnabled = enabled; }
     
+    public boolean isRepeatLastNEnabled() { return repeatLastNEnabled; }
+    public void setRepeatLastNEnabled(boolean enabled) { this.repeatLastNEnabled = enabled; }
+    
     public boolean isPresencePenaltyEnabled() { return presencePenaltyEnabled; }
     public void setPresencePenaltyEnabled(boolean enabled) { this.presencePenaltyEnabled = enabled; }
     
@@ -522,4 +524,7 @@ public class SamplingParameters {
     
     public boolean isDryEnabled() { return dryEnabled; }
     public void setDryEnabled(boolean enabled) { this.dryEnabled = enabled; }
+    
+    public boolean isMaxTokensEnabled() { return maxTokensEnabled; }
+    public void setMaxTokensEnabled(boolean enabled) { this.maxTokensEnabled = enabled; }
 }

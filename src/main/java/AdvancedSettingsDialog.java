@@ -23,6 +23,7 @@ public class AdvancedSettingsDialog {
     private Text logitBiasText;
     private Text stoppingStringsText;
     private Text bannedTokensText;
+    private Button ignoreEosCheck;
     
     public AdvancedSettingsDialog(Shell parent, AdvancedSettings settings) {
         this.parentShell = parent;
@@ -56,7 +57,7 @@ public class AdvancedSettingsDialog {
         shell = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
         shell.setText("Advanced Generation Settings");
         shell.setLayout(new GridLayout(1, false));
-        shell.setSize(500, 400);
+        shell.setSize(Constants.ADVANCED_DIALOG_WIDTH, Constants.ADVANCED_DIALOG_HEIGHT);
     }
     
     private void createContents() {
@@ -79,7 +80,7 @@ public class AdvancedSettingsDialog {
         grammarText = new Text(group, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.WRAP);
         GridData grammarData = new GridData(SWT.FILL, SWT.FILL, true, true);
         grammarData.horizontalSpan = 2;
-        grammarData.heightHint = 100;
+        grammarData.heightHint = Constants.GRAMMAR_TEXT_HEIGHT;
         grammarText.setLayoutData(grammarData);
         
         // JSON Schema
@@ -91,7 +92,7 @@ public class AdvancedSettingsDialog {
         jsonSchemaText = new Text(group, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.WRAP);
         GridData jsonData = new GridData(SWT.FILL, SWT.FILL, true, true);
         jsonData.horizontalSpan = 2;
-        jsonData.heightHint = 80;
+        jsonData.heightHint = Constants.JSON_SCHEMA_TEXT_HEIGHT;
         jsonSchemaText.setLayoutData(jsonData);
         
         // Logit Bias
@@ -103,9 +104,9 @@ public class AdvancedSettingsDialog {
         logitBiasText = new Text(group, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.WRAP);
         GridData biasData = new GridData(SWT.FILL, SWT.FILL, true, true);
         biasData.horizontalSpan = 2;
-        biasData.heightHint = 60;
+        biasData.heightHint = Constants.LOGIT_BIAS_TEXT_HEIGHT;
         logitBiasText.setLayoutData(biasData);
-        logitBiasText.setText("[]");
+        logitBiasText.setText(Constants.DEFAULT_LOGIT_BIAS);
         
         // Stopping Strings
         new Label(group, SWT.NONE).setText("Stopping Strings:");
@@ -128,6 +129,10 @@ public class AdvancedSettingsDialog {
         GridData banData = new GridData(SWT.FILL, SWT.CENTER, true, false);
         banData.horizontalSpan = 2;
         bannedTokensText.setLayoutData(banData);
+        
+        ignoreEosCheck = new Button(group, SWT.CHECK);
+        ignoreEosCheck.setText("Ignore End of Stream");
+        ignoreEosCheck.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     }
     
     private void createButtonBar() {
@@ -181,6 +186,7 @@ public class AdvancedSettingsDialog {
         logitBiasText.setText(settings.getLogitBias());
         stoppingStringsText.setText(settings.getStoppingStrings());
         bannedTokensText.setText(settings.getBannedTokens());
+        ignoreEosCheck.setSelection(settings.isIgnoreEos());
     }
     
     private void saveSettings() {
@@ -189,6 +195,7 @@ public class AdvancedSettingsDialog {
         settings.setLogitBias(logitBiasText.getText());
         settings.setStoppingStrings(stoppingStringsText.getText());
         settings.setBannedTokens(bannedTokensText.getText());
+        settings.setIgnoreEos(ignoreEosCheck.getSelection());
     }
     
     private void clearAll() {
@@ -197,6 +204,7 @@ public class AdvancedSettingsDialog {
         logitBiasText.setText("[]");
         stoppingStringsText.setText("");
         bannedTokensText.setText("");
+        ignoreEosCheck.setSelection(false);
     }
     
     private void centerOnParent() {
