@@ -109,6 +109,7 @@ public class GenerationManager {
                                         app.getDisplay().asyncExec(() -> {
                                             if (!isCancelled && !app.getPromptText().isDisposed()) {
                                                 app.getTokenManager().appendSingleToken(finalToken, finalProbability, finalAlternatives);
+                                                app.scrollToBottom();
                                             }
                                         });
                                     }

@@ -25,7 +25,9 @@ public class UIManager {
         shell.setLayout(new GridLayout(1, false));
         
         createSessionGroup();
-        createSettingsGroup();
+        createModelSettingsGroup();
+        createSamplingGroup();
+        createFontGroup();
         createPromptArea();
         createControlButtons();
         createStatusBar();
@@ -69,9 +71,9 @@ public class UIManager {
         app.setImportSessionButton(importSessionButton);
     }
     
-    private void createSettingsGroup() {
+    private void createModelSettingsGroup() {
         Group settingsGroup = new Group(app.getShell(), SWT.NONE);
-        settingsGroup.setText("Settings");
+        settingsGroup.setText("Model Settings");
         settingsGroup.setLayout(new GridLayout(2, false));
         settingsGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
         
@@ -92,10 +94,15 @@ public class UIManager {
         Text modelText = new Text(settingsGroup, SWT.BORDER);
         modelText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         app.setModelText(modelText);
+    }
+    
+    private void createSamplingGroup() {
+        Group samplingGroup = new Group(app.getShell(), SWT.NONE);
+        samplingGroup.setText("Sampling Parameters");
+        samplingGroup.setLayout(new GridLayout(1, false));
+        samplingGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
         
-        // Sampling Parameters
-        new Label(settingsGroup, SWT.NONE).setText("Sampling Parameters:");
-        Composite samplingComp = new Composite(settingsGroup, SWT.NONE);
+        Composite samplingComp = new Composite(samplingGroup, SWT.NONE);
         samplingComp.setLayout(new GridLayout(2, false));
         samplingComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         
@@ -108,6 +115,38 @@ public class UIManager {
         app.setSamplingParamsLabel(samplingParamsLabel);
     }
     
+    private void createFontGroup() {
+        Group fontGroup = new Group(app.getShell(), SWT.NONE);
+        fontGroup.setText("Font Settings");
+        fontGroup.setLayout(new GridLayout(6, false));
+        fontGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+        
+        // Font Name
+        new Label(fontGroup, SWT.NONE).setText("Font:");
+        Combo fontNameCombo = new Combo(fontGroup, SWT.READ_ONLY);
+        fontNameCombo.setItems(new String[]{"Consolas", "Courier New", "Monaco", "Menlo", "DejaVu Sans Mono", "Liberation Mono"});
+        fontNameCombo.select(0);
+        app.setFontNameCombo(fontNameCombo);
+        
+        // Font Size
+        new Label(fontGroup, SWT.NONE).setText("Size:");
+        Spinner fontSizeSpinner = new Spinner(fontGroup, SWT.BORDER);
+        fontSizeSpinner.setMinimum(8);
+        fontSizeSpinner.setMaximum(72);
+        fontSizeSpinner.setSelection(10);
+        app.setFontSizeSpinner(fontSizeSpinner);
+        
+        // Bold
+        Button fontBoldButton = new Button(fontGroup, SWT.CHECK);
+        fontBoldButton.setText("Bold");
+        app.setFontBoldButton(fontBoldButton);
+        
+        // Italic
+        Button fontItalicButton = new Button(fontGroup, SWT.CHECK);
+        fontItalicButton.setText("Italic");
+        app.setFontItalicButton(fontItalicButton);
+    }
+    
     private void createPromptArea() {
         Group promptGroup = new Group(app.getShell(), SWT.NONE);
         promptGroup.setText("Prompt");
@@ -117,6 +156,7 @@ public class UIManager {
         // Prompt text area
         StyledText promptText = new StyledText(promptGroup, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
         promptText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        promptText.setMargins(3, 3, 3, 3);
         app.setPromptText(promptText);
     }
     

@@ -4,6 +4,8 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Spinner;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Combo;
 
 public class SimpleMikuPad {
@@ -37,6 +39,10 @@ public class SimpleMikuPad {
     private Button cloneSessionButton;
     private Button exportSessionButton;
     private Button importSessionButton;
+    private Spinner fontSizeSpinner;
+    private Combo fontNameCombo;
+    private Button fontBoldButton;
+    private Button fontItalicButton;
     
     private boolean isLoadingSession = false;
     
@@ -131,6 +137,10 @@ public class SimpleMikuPad {
     public Button getCloneSessionButton() { return cloneSessionButton; }
     public Button getExportSessionButton() { return exportSessionButton; }
     public Button getImportSessionButton() { return importSessionButton; }
+    public Spinner getFontSizeSpinner() { return fontSizeSpinner; }
+    public Combo getFontNameCombo() { return fontNameCombo; }
+    public Button getFontBoldButton() { return fontBoldButton; }
+    public Button getFontItalicButton() { return fontItalicButton; }
     
     // UI Component setters
     public void setPromptText(StyledText promptText) { this.promptText = promptText; }
@@ -150,6 +160,10 @@ public class SimpleMikuPad {
     public void setCloneSessionButton(Button cloneSessionButton) { this.cloneSessionButton = cloneSessionButton; }
     public void setExportSessionButton(Button exportSessionButton) { this.exportSessionButton = exportSessionButton; }
     public void setImportSessionButton(Button importSessionButton) { this.importSessionButton = importSessionButton; }
+    public void setFontSizeSpinner(Spinner fontSizeSpinner) { this.fontSizeSpinner = fontSizeSpinner; }
+    public void setFontNameCombo(Combo fontNameCombo) { this.fontNameCombo = fontNameCombo; }
+    public void setFontBoldButton(Button fontBoldButton) { this.fontBoldButton = fontBoldButton; }
+    public void setFontItalicButton(Button fontItalicButton) { this.fontItalicButton = fontItalicButton; }
     
     public boolean isLoadingSession() { return isLoadingSession; }
     public void setLoadingSession(boolean loading) { this.isLoadingSession = loading; }
@@ -157,6 +171,15 @@ public class SimpleMikuPad {
     public void updateStatus(String message) {
         if (!statusLabel.isDisposed()) {
             statusLabel.setText(message);
+        }
+    }
+    
+    public void scrollToBottom() {
+        if (!promptText.isDisposed()) {
+            int lineCount = promptText.getLineCount();
+            if (lineCount > 0) {
+                promptText.setTopIndex(lineCount - 1);
+            }
         }
     }
 }
