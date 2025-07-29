@@ -67,7 +67,7 @@ public class GenerationManager {
                 JsonObject request = samplingParams.toJson(advancedSettings);
                 request.addProperty("prompt", prompt);
                 request.addProperty("stream", true);
-                request.addProperty("logprobs", 10);
+                request.addProperty("logprobs", Constants.DEFAULT_LOGPROBS_COUNT);
                 
                 if (!model.isEmpty()) {
                     request.addProperty("model", model);
@@ -75,7 +75,7 @@ public class GenerationManager {
                 
                 String requestBody = new Gson().toJson(request);
                 
-                URI uri = URI.create(endpoint + "/v1/completions");
+                URI uri = URI.create(endpoint + Constants.COMPLETIONS_ENDPOINT_PATH);
                 HttpResponse<InputStream> response = app.getHttpClient().sendRequest(
                     uri, 
                     apiKey.isEmpty() ? null : apiKey, 

@@ -206,7 +206,7 @@ public class ParameterControl extends Composite {
         if (isInteger) {
             intSpinner.setSelection((int)value);
         } else {
-            valueText.setText(formatDouble(value));
+            valueText.setText(String.valueOf(value));
         }
     }
     

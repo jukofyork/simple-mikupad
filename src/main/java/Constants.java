@@ -124,6 +124,38 @@ public class Constants {
     public static final int ADVANCED_DIALOG_WIDTH = 500;
     public static final int ADVANCED_DIALOG_HEIGHT = 400;
     
+    // Main window dimensions
+    public static final int MAIN_WINDOW_WIDTH = 1440;
+    public static final int MAIN_WINDOW_HEIGHT = 1080;
+    
+    // Session defaults
+    public static final String DEFAULT_ENDPOINT = "http://127.0.0.1:8080";
+    public static final String DEFAULT_MODEL = "Qwen3-30B-A3B";
+    public static final String SESSION_DISPLAY_DATE_FORMAT = "dd MMM yyyy HH:mm";
+    public static final String MIKUPAD_DIR_NAME = ".mikupad";
+    public static final String SESSIONS_FILE_NAME = "sessions.json";
+    public static final String DEFAULT_SESSION_NAME = "Default Session";
+    public static final String DEFAULT_SESSION_PROMPT = "<|im_start|>user\nWrite me story about pigs<|im_end|>\n<|im_start|>assistant\n\n<think>\n\n</think>\n\n";
+    
+    // Token coloring constants
+    public static final int COLOR_PROBABILITY_SCALE = 100;
+    public static final float COLOR_RATIO_THRESHOLD = 0.5f;
+    public static final float COLOR_RATIO_MULTIPLIER = 2.0f;
+    public static final int COLOR_RED_BASE = 120;
+    public static final int COLOR_RED_RANGE = 60;
+    public static final int COLOR_RED_MAX = 180;
+    public static final int COLOR_GREEN_LOW_RANGE = 40;
+    public static final int COLOR_GREEN_HIGH_RANGE = 100;
+    public static final int PERCENTAGE_MULTIPLIER = 100;
+    
+    // Tooltip positioning
+    public static final int TOOLTIP_OFFSET_X = 10;
+    public static final int TOOLTIP_OFFSET_Y = 10;
+    
+    // API constants
+    public static final int DEFAULT_LOGPROBS_COUNT = 10;
+    public static final String COMPLETIONS_ENDPOINT_PATH = "/v1/completions";
+    
     // Valid sampler names
     public static final Set<String> VALID_SAMPLERS = new HashSet<>(Arrays.asList("dry", "top_k", "typ_p", "top_p", "min_p", "xtc", "temperature"));
     

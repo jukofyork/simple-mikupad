@@ -20,8 +20,8 @@ public class UIManager {
     
     public void createUI() {
         Shell shell = app.getShell();
-        shell.setText("Simple MikuPad with Token Highlighting");
-        shell.setSize(900, 750);
+        shell.setText("Simple MikuPad");
+        shell.setSize(Constants.MAIN_WINDOW_WIDTH, Constants.MAIN_WINDOW_HEIGHT);
         shell.setLayout(new GridLayout(1, false));
         
         createSessionGroup();
@@ -36,7 +36,7 @@ public class UIManager {
     private void createSessionGroup() {
         Group sessionGroup = new Group(app.getShell(), SWT.NONE);
         sessionGroup.setText("Session Management");
-        sessionGroup.setLayout(new GridLayout(7, false));
+        sessionGroup.setLayout(new GridLayout(8, false));
         sessionGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
         
         // Session dropdown
@@ -61,14 +61,14 @@ public class UIManager {
         Button cloneSessionButton = new Button(sessionGroup, SWT.PUSH);
         cloneSessionButton.setText("Clone");
         app.setCloneSessionButton(cloneSessionButton);
-        
-        Button exportSessionButton = new Button(sessionGroup, SWT.PUSH);
-        exportSessionButton.setText("Export");
-        app.setExportSessionButton(exportSessionButton);
-        
+
         Button importSessionButton = new Button(sessionGroup, SWT.PUSH);
         importSessionButton.setText("Import");
         app.setImportSessionButton(importSessionButton);
+
+        Button exportSessionButton = new Button(sessionGroup, SWT.PUSH);
+        exportSessionButton.setText("Export");
+        app.setExportSessionButton(exportSessionButton);        
     }
     
     private void createModelSettingsGroup() {
@@ -145,7 +145,7 @@ public class UIManager {
         Spinner fontSizeSpinner = new Spinner(fontGroup, SWT.BORDER);
         fontSizeSpinner.setMinimum(8);
         fontSizeSpinner.setMaximum(72);
-        fontSizeSpinner.setSelection(10);
+        fontSizeSpinner.setSelection(12);
         app.setFontSizeSpinner(fontSizeSpinner);
         
         // Bold

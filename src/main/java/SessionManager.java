@@ -30,18 +30,18 @@ public class SessionManager {
         
         // Sessions stored in user home directory
         String userHome = System.getProperty("user.home");
-        File mikupadDir = new File(userHome, ".mikupad");
+        File mikupadDir = new File(userHome, Constants.MIKUPAD_DIR_NAME);
         if (!mikupadDir.exists()) {
             mikupadDir.mkdirs();
         }
-        this.sessionsFile = new File(mikupadDir, "sessions.json");
+        this.sessionsFile = new File(mikupadDir, Constants.SESSIONS_FILE_NAME);
         
         loadSessions();
         
         // Create default session if none exist
         if (sessions.isEmpty()) {
-            Session defaultSession = new Session("Default Session");
-            defaultSession.setPromptText("<|im_start|>user\nWrite me story about pigs<|im_end|>\n<|im_start|>assistant\n\n<think>\n\n</think>\n\n");
+            Session defaultSession = new Session(Constants.DEFAULT_SESSION_NAME);
+            defaultSession.setPromptText(Constants.DEFAULT_SESSION_PROMPT);
             addSession(defaultSession);
             setCurrentSession(defaultSession.getId());
         }

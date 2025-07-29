@@ -71,17 +71,17 @@ public class TokenManager {
             
             if (ratio < 0.5f) {
                 // Dark red to dark orange (0.0 to 0.5)
-                float localRatio = ratio * 2;
+                float localRatio = ratio * Constants.COLOR_RATIO_MULTIPLIER;
                 rgb = new RGB(
-                    120 + (int)(60 * localRatio),  // 120-180 red
-                    (int)(40 * localRatio),        // 0-40 green
+                    Constants.COLOR_RED_BASE + (int)(Constants.COLOR_RED_RANGE * localRatio),
+                    (int)(Constants.COLOR_GREEN_LOW_RANGE * localRatio),
                     0);                            // 0 blue
             } else {
                 // Dark orange to dark green (0.5 to 1.0)
-                float localRatio = (ratio - 0.5f) * 2;
+                float localRatio = (ratio - Constants.COLOR_RATIO_THRESHOLD) * Constants.COLOR_RATIO_MULTIPLIER;
                 rgb = new RGB(
-                    180 - (int)(180 * localRatio), // 180-0 red (remove all red)
-                    40 + (int)(100 * localRatio),  // 40-140 green (more green)
+                    Constants.COLOR_RED_MAX - (int)(Constants.COLOR_RED_MAX * localRatio),
+                    Constants.COLOR_GREEN_LOW_RANGE + (int)(Constants.COLOR_GREEN_HIGH_RANGE * localRatio),
                     0);                            // 0 blue
             }
             
@@ -120,7 +120,7 @@ public class TokenManager {
     
     private Color getColorForProbability(double probability) {
         probability = Math.max(0, Math.min(1, probability));
-        int index = (int)(probability * 100);
+        int index = (int)(probability * Constants.COLOR_PROBABILITY_SCALE);
         return colors.get(index);
     }
     
@@ -170,11 +170,15 @@ public class TokenManager {
         StringBuilder message = new StringBuilder();
         
         if (tokenInfo.alternatives != null && !tokenInfo.alternatives.isEmpty()) {
+            boolean first = true;
             for (TokenAlternative alt : tokenInfo.alternatives) {
-                double percentage = alt.probability * 100;
-                message.append(String.format("%.1f%% - \"%s\"", percentage, escapeForTooltip(alt.token)));
-                if (alt != tokenInfo.alternatives.get(tokenInfo.alternatives.size() - 1)) {
-                    message.append("\n");
+                double percentage = alt.probability * Constants.PERCENTAGE_MULTIPLIER;
+                if (Math.round(percentage * 10.0) / 10.0 > 0.0) {
+                    if (!first) {
+                        message.append("\n");
+                    }
+                    message.append(String.format("%.1f%% - \"%s\"", percentage, escapeForTooltip(alt.token)));
+                    first = false;
                 }
             }
         }
@@ -186,7 +190,7 @@ public class TokenManager {
         currentTooltip.pack();
         
         Point displayPoint = app.getPromptText().toDisplay(x, y);
-        currentTooltip.setLocation(displayPoint.x + 10, displayPoint.y + 10);
+        currentTooltip.setLocation(displayPoint.x + Constants.TOOLTIP_OFFSET_X, displayPoint.y + Constants.TOOLTIP_OFFSET_Y);
         currentTooltip.setVisible(true);
     }
     
@@ -199,7 +203,11 @@ public class TokenManager {
     }
     
     private String escapeForTooltip(String text) {
-        return text.replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
+        String escaped = text.replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
+        if (escaped.equals("\"")) {
+            escaped = "\\\"";
+        }
+        return escaped;
     }
     
     public void dispose() {

@@ -320,8 +320,8 @@ public class SessionUIManager {
         Session currentSession = app.getSessionManager().getCurrentSession();
         if (currentSession != null && app.getSamplingParamsLabel() != null) {
             SamplingParameters params = currentSession.getSamplingParams();
-            String summary = String.format("Temp: %.2f, Max: %d, Top-P: %.2f, Top-K: %d", 
-                params.getTemperature(), params.getMaxTokens(), params.getTopP(), params.getTopK());
+            String summary = String.format("Temp: %.2f, Top-K: %d, Top-P: %.2f, Min-P: %.2f", 
+                params.getTemperature(), params.getTopK(), params.getTopP(), params.getMinP());
             app.getSamplingParamsLabel().setText(summary);
         }
     }

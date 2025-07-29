@@ -38,9 +38,9 @@ public class Session {
         this.lastModified = LocalDateTime.now();
         
         // Default API settings
-        this.endpoint = "http://127.0.0.1:3000";
+        this.endpoint = Constants.DEFAULT_ENDPOINT;
         this.apiKey = "";
-        this.model = "Qwen3-30B-A3B";
+        this.model = Constants.DEFAULT_MODEL;
         
         // Default sampling parameters
         this.samplingParams = new SamplingParameters();
@@ -195,6 +195,6 @@ public class Session {
     
     @Override
     public String toString() {
-        return name + " (" + lastModified.format(DateTimeFormatter.ofPattern("MM/dd HH:mm")) + ")";
+        return name + " (" + lastModified.format(DateTimeFormatter.ofPattern(Constants.SESSION_DISPLAY_DATE_FORMAT)) + ")";
     }
 }
