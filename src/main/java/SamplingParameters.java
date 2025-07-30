@@ -234,7 +234,7 @@ public class SamplingParameters {
         
         // Advanced features
         if (advancedSettings != null && !advancedSettings.getGrammar().trim().isEmpty()) {
-            json.addProperty("grammar", advancedSettings.getGrammar().trim());
+            json.addProperty("grammar", Constants.processEscapeSequences(advancedSettings.getGrammar().trim()));
         }
         
         if (advancedSettings != null && !advancedSettings.getJsonSchema().trim().isEmpty()) {
@@ -263,7 +263,7 @@ public class SamplingParameters {
                     String trimmed = token.trim();
                     if (!trimmed.isEmpty()) {
                         com.google.gson.JsonArray tokenBias = new com.google.gson.JsonArray();
-                        tokenBias.add(trimmed);
+                        tokenBias.add(Constants.processEscapeSequences(trimmed));
                         tokenBias.add(-100.0);
                         biasArray.add(tokenBias);
                     }
@@ -284,7 +284,7 @@ public class SamplingParameters {
                 for (String stop : stops) {
                     String trimmed = stop.trim();
                     if (!trimmed.isEmpty()) {
-                        stopArray.add(trimmed);
+                        stopArray.add(Constants.processEscapeSequences(trimmed));
                     }
                 }
                 if (stopArray.size() > 0) {
