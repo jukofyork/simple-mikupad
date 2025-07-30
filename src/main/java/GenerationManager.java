@@ -60,10 +60,20 @@ public class GenerationManager {
         SamplingParameters samplingParams = currentSession.getSamplingParams();
         AdvancedSettings advancedSettings = currentSession.getAdvancedSettings();
         
-        app.updateStatus("Generating completion...");
+        app.updateStatus("Tokenizing prompt...");
         
         CompletableFuture.runAsync(() -> {
             try {
+                // First, tokenize the prompt to show token boundaries
+                tokenizePrompt(endpoint, apiKey, prompt);
+                
+                if (isCancelled) return;
+                
+                app.getDisplay().asyncExec(() -> {
+                    app.updateStatus("Generating completion...");
+                });
+                
+                // Then proceed with normal generation
                 JsonObject request = samplingParams.toJson(advancedSettings);
                 request.addProperty("prompt", prompt);
                 request.addProperty("stream", true);
@@ -139,6 +149,84 @@ public class GenerationManager {
                 });
             }
         });
+    }
+    
+    private void tokenizePrompt(String endpoint, String apiKey, String prompt) throws Exception {
+        JsonObject tokenizeRequest = new JsonObject();
+        tokenizeRequest.addProperty("content", prompt);
+        tokenizeRequest.addProperty("with_pieces", true);
+        
+        String requestBody = new Gson().toJson(tokenizeRequest);
+        
+        URI uri = URI.create(endpoint + Constants.TOKENIZE_ENDPOINT_PATH);
+        HttpResponse<InputStream> response = app.getHttpClient().sendRequest(
+            uri, 
+            apiKey.isEmpty() ? null : apiKey, 
+            requestBody, 
+            false
+        );
+        
+        if (isCancelled) return;
+        
+        String responseBody;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.body()))) {
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+            responseBody = sb.toString();
+        }
+        
+        JsonObject responseJson = JsonParser.parseString(responseBody).getAsJsonObject();
+        
+        if (!responseJson.has("tokens")) {
+            throw new Exception("Tokenize response missing 'tokens' field. Response: " + responseBody);
+        }
+        
+        JsonArray tokens = responseJson.getAsJsonArray("tokens");
+        if (tokens == null) {
+            throw new Exception("Tokenize response 'tokens' field is null. Response: " + responseBody);
+        }
+        
+        int currentOffset = 0;
+        
+        for (int i = 0; i < tokens.size(); i++) {
+            JsonElement tokenElement = tokens.get(i);
+            
+            if (tokenElement.isJsonObject()) {
+                JsonObject token = tokenElement.getAsJsonObject();
+                
+                if (token.has("piece")) {
+                    String piece = "";
+                    JsonElement pieceElement = token.get("piece");
+                    if (pieceElement.isJsonArray()) {
+                        // Handle byte array case
+                        JsonArray byteArray = pieceElement.getAsJsonArray();
+                        StringBuilder sb = new StringBuilder();
+                        for (int j = 0; j < byteArray.size(); j++) {
+                            sb.append((char) byteArray.get(j).getAsInt());
+                        }
+                        piece = sb.toString();
+                    } else {
+                        // Handle string case
+                        piece = pieceElement.getAsString();
+                    }
+                    
+                    if (!piece.isEmpty()) {
+                        final int offset = currentOffset;
+                        final int length = piece.length();
+                        final int tokenIndex = i;
+                        app.getDisplay().asyncExec(() -> {
+                            if (!isCancelled) {
+                                app.getTokenManager().showPromptToken(offset, length, tokenIndex);
+                            }
+                        });
+                        currentOffset += piece.length();
+                    }
+                }
+            }
+        }
     }
     
     public void cancelGeneration() {

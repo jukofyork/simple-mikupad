@@ -24,6 +24,8 @@ public class TokenManager {
     private TokenInfo currentHoverToken;
     private boolean coloringEnabled = true;
     private List<Color> colors = new ArrayList<>();
+    private Color promptColorDark;
+    private Color promptColorLight;
     
     public TokenManager(SimpleMikuPad app) {
         this.app = app;
@@ -65,6 +67,10 @@ public class TokenManager {
     }
     
     private void createColors() {
+        // Create prompt token colors
+        promptColorDark = new Color(app.getDisplay(), new RGB(0, Constants.COLOR_BLUE_GREEN_LOW, Constants.COLOR_BLUE_DARK));
+        promptColorLight = new Color(app.getDisplay(), new RGB(0, Constants.COLOR_BLUE_GREEN_HIGH, Constants.COLOR_BLUE_LIGHT));
+        
         for (int i = 0; i <= 100; i++) {
             float ratio = i / 100.0f;
             RGB rgb;
@@ -87,6 +93,19 @@ public class TokenManager {
             
             colors.add(new Color(app.getDisplay(), rgb));
         }
+    }
+    
+    public void showPromptToken(int offset, int length, int tokenIndex) {
+        if (app.getPromptText().isDisposed() || !coloringEnabled) return;
+        
+        StyleRange style = new StyleRange();
+        style.start = offset;
+        style.length = length;
+        
+        // Alternate between the two blue shades
+        style.background = (tokenIndex % 2 == 0) ? promptColorDark : promptColorLight;
+        
+        app.getPromptText().setStyleRange(style);
     }
     
     public void appendSingleToken(String token, double probability, List<TokenAlternative> alternatives) {
@@ -215,6 +234,12 @@ public class TokenManager {
             if (!color.isDisposed()) {
                 color.dispose();
             }
+        }
+        if (promptColorDark != null && !promptColorDark.isDisposed()) {
+            promptColorDark.dispose();
+        }
+        if (promptColorLight != null && !promptColorLight.isDisposed()) {
+            promptColorLight.dispose();
         }
     }
     

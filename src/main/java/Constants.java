@@ -137,7 +137,13 @@ public class Constants {
     public static final String DEFAULT_SESSION_NAME = "Default Session";
     public static final String DEFAULT_SESSION_PROMPT = "<|im_start|>user\nWrite me story about pigs<|im_end|>\n<|im_start|>assistant\n\n<think>\n\n</think>\n\n";
     
-    // Token coloring constants
+    // Prompt coloring constants
+    public static final int COLOR_BLUE_DARK = 120;
+    public static final int COLOR_BLUE_LIGHT = 180;
+    public static final int COLOR_BLUE_GREEN_LOW = 40;
+    public static final int COLOR_BLUE_GREEN_HIGH = 60;
+
+    // Token generation coloring constants
     public static final int COLOR_PROBABILITY_SCALE = 100;
     public static final float COLOR_RATIO_THRESHOLD = 0.5f;
     public static final float COLOR_RATIO_MULTIPLIER = 2.0f;
@@ -155,6 +161,7 @@ public class Constants {
     // API constants
     public static final int DEFAULT_LOGPROBS_COUNT = 10;
     public static final String COMPLETIONS_ENDPOINT_PATH = "/v1/completions";
+    public static final String TOKENIZE_ENDPOINT_PATH = "/tokenize";
     
     // Valid sampler names
     public static final Set<String> VALID_SAMPLERS = new HashSet<>(Arrays.asList("dry", "top_k", "typ_p", "top_p", "min_p", "xtc", "temperature"));
