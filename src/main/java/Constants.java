@@ -159,9 +159,7 @@ public class Constants {
     public static final int TOOLTIP_OFFSET_Y = 10;
     
     // API constants
-    public static final int DEFAULT_LOGPROBS_COUNT = 10;
-    public static final String COMPLETIONS_ENDPOINT_PATH = "/v1/completions";
-    public static final String TOKENIZE_ENDPOINT_PATH = "/tokenize";
+    public static final int DEFAULT_TOKEN_ALTERNATIVES_COUNT = 10;
     
     // Valid sampler names
     public static final Set<String> VALID_SAMPLERS = new HashSet<>(Arrays.asList("dry", "top_k", "typ_p", "top_p", "min_p", "xtc", "temperature"));

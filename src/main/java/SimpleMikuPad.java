@@ -15,7 +15,7 @@ public class SimpleMikuPad {
     private UIManager uiManager;
     private SessionUIManager sessionUIManager;
     private TokenManager tokenManager;
-    private GenerationManager generationManager;
+    private BaseGenerationManager generationManager;
     private TextOperationsManager textOperationsManager;
     
     private SessionManager sessionManager;
@@ -47,6 +47,9 @@ public class SimpleMikuPad {
     private Button fontItalicButton;
     
     private boolean isLoadingSession = false;
+    
+    // Add API type selection (add this to UI later)
+    private String apiType = "openai";
     
     public static void main(String[] args) {
         new SimpleMikuPad().run();
@@ -86,7 +89,16 @@ public class SimpleMikuPad {
     private void initializeManagers() {
         sessionUIManager = new SessionUIManager(this);
         tokenManager = new TokenManager(this);
-        generationManager = new GenerationManager(this);
+        
+        // Create the appropriate generation manager based on API type
+        switch (apiType) {
+            case "llama.cpp":
+                generationManager = new LlamaCppGenerationManager(this);
+                break;
+            case "openai":
+                generationManager = new OpenAiGenerationManager(this);
+                break;
+        }
         textOperationsManager = new TextOperationsManager(this);
     }
     
@@ -119,7 +131,7 @@ public class SimpleMikuPad {
     public SessionManager getSessionManager() { return sessionManager; }
     public HttpClientWrapper getHttpClient() { return httpClient; }
     public TokenManager getTokenManager() { return tokenManager; }
-    public GenerationManager getGenerationManager() { return generationManager; }
+    public BaseGenerationManager getGenerationManager() { return generationManager; }
     
     // UI Component getters
     public StyledText getPromptText() { return promptText; }
@@ -173,6 +185,25 @@ public class SimpleMikuPad {
     
     public boolean isLoadingSession() { return isLoadingSession; }
     public void setLoadingSession(boolean loading) { this.isLoadingSession = loading; }
+    
+    // Add method to switch API types (optional)
+    public void setApiType(String apiType) {
+        this.apiType = apiType;
+        // Reinitialize generation manager if needed
+        if (generationManager != null) {
+            switch (apiType) {
+                case "llama.cpp":
+                    generationManager = new LlamaCppGenerationManager(this);
+                    break;
+                case "openai-v1":
+                    generationManager = new OpenAiGenerationManager(this);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown API type: " + apiType);
+            }
+            generationManager.setupEventListeners();
+        }
+    }
     
     public void updateStatus(String message) {
         if (!statusLabel.isDisposed()) {
