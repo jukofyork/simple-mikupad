@@ -92,7 +92,6 @@ public abstract class BaseGenerationManager {
 
 				app.getDisplay().asyncExec(() -> {
 					if (!isCancelled) {
-						app.updateStatus("Generation completed");
 						SessionUIManager sessionUI = new SessionUIManager(app);
 						sessionUI.saveCurrentSessionState();
 					}
@@ -138,8 +137,8 @@ public abstract class BaseGenerationManager {
 
 			try {
 				JsonObject tokenResponse = JsonParser.parseString(eventData).getAsJsonObject();
+
 				JsonObject tokenLogprobs = extractTokenData(tokenResponse);
-				
 				if (tokenLogprobs != null) {
 					String tokenText = getTokenText(tokenLogprobs);
 					
@@ -154,6 +153,13 @@ public abstract class BaseGenerationManager {
 							}
 						});
 					}
+				}
+				
+				String completionReason = extractCompletionReason(tokenResponse);
+				if (completionReason != null) {
+					app.getDisplay().asyncExec(() -> {
+						app.updateStatus("Generation completed (reason: '" + completionReason + "')");
+					});
 				}
 			} catch (Exception e) {
 				System.err.println("Error parsing token response: " + e.getMessage());
@@ -191,4 +197,5 @@ public abstract class BaseGenerationManager {
 	protected abstract String getTokenText(JsonObject tokenLogprobs);
 	protected abstract double getTokenProbability(JsonObject tokenLogprobs);
 	protected abstract List<TokenManager.TokenAlternative> getTokenAlternatives(JsonObject tokenLogprobs);
+	protected abstract String extractCompletionReason(JsonObject tokenResponse);
 }

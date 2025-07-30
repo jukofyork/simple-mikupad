@@ -49,7 +49,7 @@ public class SimpleMikuPad {
     private boolean isLoadingSession = false;
     
     // Add API type selection (add this to UI later)
-    private String apiType = "openai";
+    private String apiType = "llama.cpp";
     
     public static void main(String[] args) {
         new SimpleMikuPad().run();

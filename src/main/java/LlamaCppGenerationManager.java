@@ -127,4 +127,12 @@ public class LlamaCppGenerationManager extends BaseGenerationManager {
 
 		return new java.util.ArrayList<>();
 	}
+
+	@Override
+	protected String extractCompletionReason(JsonObject tokenResponse) {
+		if (tokenResponse.has("stop_type")) {
+			return tokenResponse.get("stop_type").getAsString();
+		}
+		return null;
+	}
 }

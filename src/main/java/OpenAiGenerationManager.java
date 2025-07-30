@@ -22,6 +22,9 @@ public class OpenAiGenerationManager extends BaseGenerationManager {
 	protected JsonObject extractTokenData(JsonObject tokenResponse) {
 		JsonArray completionChoices = tokenResponse.getAsJsonArray("choices");
 		JsonObject primaryCompletion = completionChoices.get(0).getAsJsonObject();
+		if (primaryCompletion.get("logprobs").isJsonNull()) {
+			return null;
+		}
 		JsonObject logProbabilityData = primaryCompletion.getAsJsonObject("logprobs");
 		JsonArray logProbabilityEntries = logProbabilityData.getAsJsonArray("content");
 		JsonObject currentTokenLogprobs = logProbabilityEntries.get(logProbabilityEntries.size() - 1).getAsJsonObject();
@@ -46,5 +49,17 @@ public class OpenAiGenerationManager extends BaseGenerationManager {
 			return buildAlternativesFromLogprobs(alternativeLogprobs);
 		}
 		return new java.util.ArrayList<>();
+	}
+
+	@Override
+	protected String extractCompletionReason(JsonObject tokenResponse) {
+		if (tokenResponse.has("choices")) {
+			JsonArray choices = tokenResponse.getAsJsonArray("choices");
+			JsonObject choice = choices.get(0).getAsJsonObject();
+			if (choice.has("finish_reason") && !choice.get("finish_reason").isJsonNull()) {
+				return choice.get("finish_reason").getAsString();
+			}
+		}
+		return null;
 	}
 }
