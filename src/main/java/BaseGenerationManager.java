@@ -44,6 +44,7 @@ public abstract class BaseGenerationManager {
 		isCancelled = false;
 		app.getGenerateButton().setEnabled(false);
 		app.getCancelButton().setEnabled(true);
+		app.getPromptText().setEditable(false);
 		app.getTokenManager().clearTokenColoring();
 
 		// Begin compound change for entire generation
@@ -117,6 +118,7 @@ public abstract class BaseGenerationManager {
 	public void cancelGeneration() {
 		isCancelled = true;
 		app.updateStatus("Cancelled");
+		app.getPromptText().setEditable(true);
 		// End compound change on cancellation
 		app.getUndoManager().endCompoundChange();
 		resetButtons();
@@ -125,6 +127,7 @@ public abstract class BaseGenerationManager {
 	protected void resetButtons() {
 		app.getGenerateButton().setEnabled(true);
 		app.getCancelButton().setEnabled(false);
+		app.getPromptText().setEditable(true);
 	}
 
 	protected void processStreamingResponse(HttpResponse<InputStream> response) throws Exception {
