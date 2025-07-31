@@ -7,6 +7,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -23,6 +24,37 @@ public class TextOperationsManager {
         setupFontControls();
         setupKeyListener();
         Menu contextMenu = new Menu(app.getPromptText());
+        
+        // Template operations
+        MenuItem wrapSystemItem = new MenuItem(contextMenu, SWT.PUSH);
+        wrapSystemItem.setText("Wrap as System");
+        wrapSystemItem.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                wrapWithTemplate("system");
+            }
+        });
+        
+        MenuItem wrapInstructionItem = new MenuItem(contextMenu, SWT.PUSH);
+        wrapInstructionItem.setText("Wrap as Instruction");
+        wrapInstructionItem.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                wrapWithTemplate("instruction");
+            }
+        });
+        
+        MenuItem addEosItem = new MenuItem(contextMenu, SWT.PUSH);
+        addEosItem.setText("Add EOS Token");
+        addEosItem.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                addEosToken();
+            }
+        });
+        
+        // Separator
+        new MenuItem(contextMenu, SWT.SEPARATOR);
         
         // Undo
         MenuItem undoItem = new MenuItem(contextMenu, SWT.PUSH);
@@ -91,6 +123,45 @@ public class TextOperationsManager {
         });
         
         app.getPromptText().setMenu(contextMenu);
+    }
+    
+    private void wrapWithTemplate(String type) {
+        if (app.getPromptText().isDisposed()) return;
+        
+        Session currentSession = app.getSessionManager().getCurrentSession();
+        SamplingParameters params = currentSession.getSamplingParams();
+        String prefix, suffix;
+        
+        if ("system".equals(type)) {
+            prefix = Constants.processEscapeSequences(params.getTemplateSysPrefix());
+            suffix = Constants.processEscapeSequences(params.getTemplateSysSuffix());
+        } else { // instruction
+            prefix = Constants.processEscapeSequences(params.getTemplateInstPrefix());
+            suffix = Constants.processEscapeSequences(params.getTemplateInstSuffix());
+        }
+        
+        Point selection = app.getPromptText().getSelection();
+        String selectedText = app.getPromptText().getSelectionText();
+        
+        String replacement = prefix + selectedText + suffix;
+        app.getPromptText().replaceTextRange(selection.x, selection.y - selection.x, replacement);
+        
+        // Position cursor after the inserted text
+        app.getPromptText().setSelection(selection.x + replacement.length());
+    }
+    
+    private void addEosToken() {
+        if (app.getPromptText().isDisposed()) return;
+        
+        Session currentSession = app.getSessionManager().getCurrentSession();
+        SamplingParameters params = currentSession.getSamplingParams();
+        String eosToken = Constants.processEscapeSequences(params.getTemplateEos());
+        
+        Point selection = app.getPromptText().getSelection();
+        app.getPromptText().replaceTextRange(selection.x, selection.y - selection.x, eosToken);
+        
+        // Position cursor after the inserted token
+        app.getPromptText().setSelection(selection.x + eosToken.length());
     }
     
     private void setupKeyListener() {

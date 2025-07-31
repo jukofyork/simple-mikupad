@@ -58,6 +58,14 @@ public class SamplingParameters {
     private String bannedTokens = Constants.DEFAULT_BANNED_TOKENS;
     private boolean ignoreEos = Constants.DEFAULT_IGNORE_EOS;
     
+    // Instruction template settings
+    private String templateName = Constants.DEFAULT_TEMPLATE_NAME;
+    private String templateSysPrefix = Constants.DEFAULT_TEMPLATE_SYS_PREFIX;
+    private String templateSysSuffix = Constants.DEFAULT_TEMPLATE_SYS_SUFFIX;
+    private String templateInstPrefix = Constants.DEFAULT_TEMPLATE_INST_PREFIX;
+    private String templateInstSuffix = Constants.DEFAULT_TEMPLATE_INST_SUFFIX;
+    private String templateEos = Constants.DEFAULT_TEMPLATE_EOS;
+    
     // Sampler toggles - which samplers are enabled
     private boolean seedEnabled = Constants.DEFAULT_SEED_ENABLED;
     private boolean samplersEnabled = Constants.DEFAULT_SAMPLERS_ENABLED;
@@ -119,6 +127,14 @@ public class SamplingParameters {
         this.stoppingStrings = other.stoppingStrings;
         this.bannedTokens = other.bannedTokens;
         this.ignoreEos = other.ignoreEos;
+        
+        // Copy template settings
+        this.templateName = other.templateName;
+        this.templateSysPrefix = other.templateSysPrefix;
+        this.templateSysSuffix = other.templateSysSuffix;
+        this.templateInstPrefix = other.templateInstPrefix;
+        this.templateInstSuffix = other.templateInstSuffix;
+        this.templateEos = other.templateEos;
         
         // Copy enabled flags
         this.seedEnabled = other.seedEnabled;
@@ -357,6 +373,28 @@ public class SamplingParameters {
         if (json.has("bannedTokens")) params.bannedTokens = json.get("bannedTokens").getAsString();
         if (json.has("ignoreEos")) params.ignoreEos = json.get("ignoreEos").getAsBoolean();
         
+        // Load template settings - only load field values if it's a custom template
+        if (json.has("templateName")) params.templateName = json.get("templateName").getAsString();
+        
+        // If it's a predefined template, load from Constants; if Custom, load saved values
+        if (Constants.CUSTOM_TEMPLATE_NAME.equals(params.templateName)) {
+            if (json.has("templateSysPrefix")) params.templateSysPrefix = json.get("templateSysPrefix").getAsString();
+            if (json.has("templateSysSuffix")) params.templateSysSuffix = json.get("templateSysSuffix").getAsString();
+            if (json.has("templateInstPrefix")) params.templateInstPrefix = json.get("templateInstPrefix").getAsString();
+            if (json.has("templateInstSuffix")) params.templateInstSuffix = json.get("templateInstSuffix").getAsString();
+            if (json.has("templateEos")) params.templateEos = json.get("templateEos").getAsString();
+        } else {
+            // Load predefined template values
+            String[] template = Constants.getTemplateByName(params.templateName);
+            if (template != null) {
+                params.templateSysPrefix = template[Constants.TEMPLATE_SYS_PREFIX_INDEX];
+                params.templateSysSuffix = template[Constants.TEMPLATE_SYS_SUFFIX_INDEX];
+                params.templateInstPrefix = template[Constants.TEMPLATE_INST_PREFIX_INDEX];
+                params.templateInstSuffix = template[Constants.TEMPLATE_INST_SUFFIX_INDEX];
+                params.templateEos = template[Constants.TEMPLATE_EOS_INDEX];
+            }
+        }
+        
         // Load enabled flags
         if (json.has("seedEnabled")) params.seedEnabled = json.get("seedEnabled").getAsBoolean();
         if (json.has("samplersEnabled")) params.samplersEnabled = json.get("samplersEnabled").getAsBoolean();
@@ -420,6 +458,18 @@ public class SamplingParameters {
         json.addProperty("stoppingStrings", stoppingStrings);
         json.addProperty("bannedTokens", bannedTokens);
         json.addProperty("ignoreEos", ignoreEos);
+        
+        // Save template settings - only save field values for custom templates
+        json.addProperty("templateName", templateName);
+        
+        // Only save field values if it's a custom template
+        if (Constants.CUSTOM_TEMPLATE_NAME.equals(templateName)) {
+            json.addProperty("templateSysPrefix", templateSysPrefix);
+            json.addProperty("templateSysSuffix", templateSysSuffix);
+            json.addProperty("templateInstPrefix", templateInstPrefix);
+            json.addProperty("templateInstSuffix", templateInstSuffix);
+            json.addProperty("templateEos", templateEos);
+        }
         
         // Save enabled flags
         json.addProperty("seedEnabled", seedEnabled);
@@ -639,4 +689,23 @@ public class SamplingParameters {
     
     public boolean isMaxTokensEnabled() { return maxTokensEnabled; }
     public void setMaxTokensEnabled(boolean enabled) { this.maxTokensEnabled = enabled; }
+    
+    // Template getters and setters
+    public String getTemplateName() { return templateName; }
+    public void setTemplateName(String templateName) { this.templateName = templateName; }
+    
+    public String getTemplateSysPrefix() { return templateSysPrefix; }
+    public void setTemplateSysPrefix(String templateSysPrefix) { this.templateSysPrefix = templateSysPrefix; }
+    
+    public String getTemplateSysSuffix() { return templateSysSuffix; }
+    public void setTemplateSysSuffix(String templateSysSuffix) { this.templateSysSuffix = templateSysSuffix; }
+    
+    public String getTemplateInstPrefix() { return templateInstPrefix; }
+    public void setTemplateInstPrefix(String templateInstPrefix) { this.templateInstPrefix = templateInstPrefix; }
+    
+    public String getTemplateInstSuffix() { return templateInstSuffix; }
+    public void setTemplateInstSuffix(String templateInstSuffix) { this.templateInstSuffix = templateInstSuffix; }
+    
+    public String getTemplateEos() { return templateEos; }
+    public void setTemplateEos(String templateEos) { this.templateEos = templateEos; }
 }

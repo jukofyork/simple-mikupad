@@ -56,6 +56,16 @@ public class SamplingParametersDialog {
     private Text bannedTokensText;
     private Button ignoreEosCheck;
     
+    // Template controls
+    private Combo templateCombo;
+    private Text templateSysPrefixText;
+    private Text templateSysSuffixText;
+    private Text templateInstPrefixText;
+    private Text templateInstSuffixText;
+    private Text templateEosText;
+    
+    private boolean isLoadingTemplate = false;
+    
     public SamplingParametersDialog(Shell parent, SamplingParameters parameters) {
         this.parentShell = parent;
         this.parameters = new SamplingParameters(parameters); // Work on a copy
@@ -99,6 +109,7 @@ public class SamplingParametersDialog {
         createBasicTab(tabFolder);
         createAdvancedTab(tabFolder);
         createConstraintsTab(tabFolder);
+        createTemplatesTab(tabFolder);
         
         createButtonBar();
     }
@@ -389,6 +400,66 @@ public class SamplingParametersDialog {
         tabItem.setControl(scrolled);
     }
     
+    private void createTemplatesTab(TabFolder parent) {
+        TabItem tabItem = new TabItem(parent, SWT.NONE);
+        tabItem.setText("Templates");
+        
+        ScrolledComposite scrolled = new ScrolledComposite(parent, SWT.V_SCROLL);
+        scrolled.setExpandHorizontal(true);
+        scrolled.setExpandVertical(true);
+        
+        Composite content = new Composite(scrolled, SWT.NONE);
+        content.setLayout(new GridLayout(1, false));
+        
+        Group templateGroup = new Group(content, SWT.NONE);
+        templateGroup.setText("Instruction Templates");
+        templateGroup.setLayout(new GridLayout(2, false));
+        templateGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        
+        // Template selection
+        new Label(templateGroup, SWT.NONE).setText("Template:");
+        templateCombo = new Combo(templateGroup, SWT.READ_ONLY);
+        templateCombo.setItems(Constants.getTemplateNames());
+        templateCombo.select(Constants.getDefaultTemplateIndex());
+        templateCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+        templateCombo.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                loadTemplateFromCombo();
+            }
+        });
+        
+        // Template fields
+        new Label(templateGroup, SWT.NONE).setText("System Prefix:");
+        templateSysPrefixText = new Text(templateGroup, SWT.BORDER);
+        templateSysPrefixText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+        templateSysPrefixText.addModifyListener(e -> checkForCustomTemplate());
+        
+        new Label(templateGroup, SWT.NONE).setText("System Suffix:");
+        templateSysSuffixText = new Text(templateGroup, SWT.BORDER);
+        templateSysSuffixText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+        templateSysSuffixText.addModifyListener(e -> checkForCustomTemplate());
+        
+        new Label(templateGroup, SWT.NONE).setText("Instruction Prefix:");
+        templateInstPrefixText = new Text(templateGroup, SWT.BORDER);
+        templateInstPrefixText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+        templateInstPrefixText.addModifyListener(e -> checkForCustomTemplate());
+        
+        new Label(templateGroup, SWT.NONE).setText("Instruction Suffix:");
+        templateInstSuffixText = new Text(templateGroup, SWT.BORDER);
+        templateInstSuffixText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+        templateInstSuffixText.addModifyListener(e -> checkForCustomTemplate());
+        
+        new Label(templateGroup, SWT.NONE).setText("EOS Token:");
+        templateEosText = new Text(templateGroup, SWT.BORDER);
+        templateEosText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+        templateEosText.addModifyListener(e -> checkForCustomTemplate());
+        
+        scrolled.setContent(content);
+        scrolled.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+        tabItem.setControl(scrolled);
+    }
+    
     private void createButtonBar() {
         Composite buttonBar = new Composite(shell, SWT.NONE);
         buttonBar.setLayout(new GridLayout(3, true));
@@ -522,6 +593,54 @@ public class SamplingParametersDialog {
         }
     }
     
+    private void loadTemplateFromCombo() {
+        isLoadingTemplate = true;
+        try {
+        String selectedTemplate = templateCombo.getText();
+        String[] template = Constants.getTemplateByName(selectedTemplate);
+        
+        if (template != null) {
+            templateSysPrefixText.setText(template[Constants.TEMPLATE_SYS_PREFIX_INDEX]);
+            templateSysSuffixText.setText(template[Constants.TEMPLATE_SYS_SUFFIX_INDEX]);
+            templateInstPrefixText.setText(template[Constants.TEMPLATE_INST_PREFIX_INDEX]);
+            templateInstSuffixText.setText(template[Constants.TEMPLATE_INST_SUFFIX_INDEX]);
+            templateEosText.setText(template[Constants.TEMPLATE_EOS_INDEX]);
+        }
+        } finally {
+            isLoadingTemplate = false;
+        }
+    }
+    
+    private void checkForCustomTemplate() {
+        if (isLoadingTemplate) {
+            return; // Don't check during template loading
+        }
+        
+        String currentTemplate = templateCombo.getText();
+        if (currentTemplate.equals(Constants.CUSTOM_TEMPLATE_NAME)) {
+            return; // Already showing custom
+        }
+        
+        String[] template = Constants.getTemplateByName(currentTemplate);
+        if (template != null) {
+            // Check if current values match the selected template
+            boolean matches = template[Constants.TEMPLATE_SYS_PREFIX_INDEX].equals(templateSysPrefixText.getText()) &&
+                            template[Constants.TEMPLATE_SYS_SUFFIX_INDEX].equals(templateSysSuffixText.getText()) &&
+                            template[Constants.TEMPLATE_INST_PREFIX_INDEX].equals(templateInstPrefixText.getText()) &&
+                            template[Constants.TEMPLATE_INST_SUFFIX_INDEX].equals(templateInstSuffixText.getText()) &&
+                            template[Constants.TEMPLATE_EOS_INDEX].equals(templateEosText.getText());
+            
+            if (!matches) {
+                // Add "Custom" option if not already present
+                String[] items = templateCombo.getItems();
+                if (!java.util.Arrays.asList(items).contains(Constants.CUSTOM_TEMPLATE_NAME)) {
+                    templateCombo.add(Constants.CUSTOM_TEMPLATE_NAME);
+                }
+                templateCombo.setText(Constants.CUSTOM_TEMPLATE_NAME);
+            }
+        }
+    }
+    
     private String getSamplersFromTable() {
         java.util.List<String> enabledSamplers = new java.util.ArrayList<>();
         
@@ -590,6 +709,19 @@ public class SamplingParametersDialog {
         bannedTokensText.setText(parameters.getBannedTokens());
         ignoreEosCheck.setSelection(parameters.isIgnoreEos());
         
+        isLoadingTemplate = true;
+        try {
+        // Templates tab
+        templateCombo.setText(parameters.getTemplateName());
+        templateSysPrefixText.setText(parameters.getTemplateSysPrefix());
+        templateSysSuffixText.setText(parameters.getTemplateSysSuffix());
+        templateInstPrefixText.setText(parameters.getTemplateInstPrefix());
+        templateInstSuffixText.setText(parameters.getTemplateInstSuffix());
+        templateEosText.setText(parameters.getTemplateEos());
+        } finally {
+            isLoadingTemplate = false;
+        }
+        
         updateEnabledStates();
     }
     
@@ -656,6 +788,14 @@ public class SamplingParametersDialog {
         parameters.setStoppingStrings(stoppingStringsText.getText());
         parameters.setBannedTokens(bannedTokensText.getText());
         parameters.setIgnoreEos(ignoreEosCheck.getSelection());
+        
+        // Templates tab
+        parameters.setTemplateName(templateCombo.getText());
+        parameters.setTemplateSysPrefix(templateSysPrefixText.getText());
+        parameters.setTemplateSysSuffix(templateSysSuffixText.getText());
+        parameters.setTemplateInstPrefix(templateInstPrefixText.getText());
+        parameters.setTemplateInstSuffix(templateInstSuffixText.getText());
+        parameters.setTemplateEos(templateEosText.getText());
         
         return true;
     }

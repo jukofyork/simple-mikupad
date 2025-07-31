@@ -163,7 +163,76 @@ public class Constants {
     
     // API constants
     public static final int DEFAULT_TOKEN_ALTERNATIVES_COUNT = 10;
+           
+    // Instruction template constants
+    public static final String CUSTOM_TEMPLATE_NAME = "Custom";
+    
+    // Template definitions
+    public static final String[][] INSTRUCTION_TEMPLATES = {
+        {"ChatML", "<|im_start|>system\\n", "<|im_end|>\\n", "<|im_start|>user\\n", "<|im_end|>\\n<|im_start|>assistant\\n", "<|im_end|>"},   
+        {"Alpaca", "### System:\\n", "\\n\\n", "### Instruction:\\n", "\\n\\n### Response:", "\\n\\n"},   
+        {"Mistral", "<<SYS>>\\n", "<</SYS>>\\n\\n", "[INST]", "[/INST]", "</s>"},
+        {"Llama 3", "<|start_header_id|>system<|end_header_id|>\\n\\n", "<|eot_id|>", "<|start_header_id|>user<|end_header_id|>\\n\\n", "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\\n\\n", "<|eot_id|>"},
+        {"Phi 2", "", "", "\\nInstruct: ", "\\nOutput: ", ""},
+        {"Phi 3", "<|system|>\\n", "<|end|>\\n", "<|user|>\\n", "<|end|>\\n<|assistant|>\\n", "<|end|>"},
+        {"Command-R", "<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>", "<|END_OF_TURN_TOKEN|>", "<|START_OF_TURN_TOKEN|><|USER_TOKEN|>", "<|END_OF_TURN_TOKEN|><|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|>", "<|END_OF_TURN_TOKEN|>"},
+        {"Metharme", "<|system|>", "", "<|user|>", "<|model|>", ""},
+        {"Vicuna", "", "\\n\\n", "USER: ", "\\nASSISTANT: ", "</s>"},
+        {"Gemma", "<start_of_turn>system\\n", "<end_of_turn>\\n", "<start_of_turn>user\\n", "<end_of_turn>\\n<start_of_turn>model\\n", "<end_of_turn>"},
+        {"R1", "", "", "<｜User｜>", "<｜Assistant｜><think>\\n", ""}
+    };
         
+    // Template field indices
+    public static final int TEMPLATE_NAME_INDEX = 0;
+    public static final int TEMPLATE_SYS_PREFIX_INDEX = 1;
+    public static final int TEMPLATE_SYS_SUFFIX_INDEX = 2;
+    public static final int TEMPLATE_INST_PREFIX_INDEX = 3;
+    public static final int TEMPLATE_INST_SUFFIX_INDEX = 4;
+    public static final int TEMPLATE_EOS_INDEX = 5;
+    
+    // Default template values (ChatML)
+    public static final String DEFAULT_TEMPLATE_NAME = INSTRUCTION_TEMPLATES[0][TEMPLATE_NAME_INDEX];
+    public static final String DEFAULT_TEMPLATE_SYS_PREFIX = INSTRUCTION_TEMPLATES[0][TEMPLATE_SYS_PREFIX_INDEX];
+    public static final String DEFAULT_TEMPLATE_SYS_SUFFIX = INSTRUCTION_TEMPLATES[0][TEMPLATE_SYS_SUFFIX_INDEX];
+    public static final String DEFAULT_TEMPLATE_INST_PREFIX = INSTRUCTION_TEMPLATES[0][TEMPLATE_INST_PREFIX_INDEX];
+    public static final String DEFAULT_TEMPLATE_INST_SUFFIX = INSTRUCTION_TEMPLATES[0][TEMPLATE_INST_SUFFIX_INDEX];
+    public static final String DEFAULT_TEMPLATE_EOS = INSTRUCTION_TEMPLATES[0][TEMPLATE_EOS_INDEX];
+    
+    /**
+     * Gets template names for dropdown
+     */
+    public static String[] getTemplateNames() {
+        String[] names = new String[INSTRUCTION_TEMPLATES.length];
+        for (int i = 0; i < INSTRUCTION_TEMPLATES.length; i++) {
+            names[i] = INSTRUCTION_TEMPLATES[i][TEMPLATE_NAME_INDEX];
+        }
+        return names;
+    }
+    
+    /**
+     * Gets template by name
+     */
+    public static String[] getTemplateByName(String name) {
+        for (String[] template : INSTRUCTION_TEMPLATES) {
+            if (template[TEMPLATE_NAME_INDEX].equals(name)) {
+                return template;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Gets default template index
+     */
+    public static int getDefaultTemplateIndex() {
+        for (int i = 0; i < INSTRUCTION_TEMPLATES.length; i++) {
+            if (INSTRUCTION_TEMPLATES[i][TEMPLATE_NAME_INDEX].equals(DEFAULT_TEMPLATE_NAME)) {
+                return i;
+            }
+        }
+        return 0;
+    }
+    
     /**
      * Parses a space-delimited string into an array of trimmed, non-empty strings.
      * @param input The space-delimited string
