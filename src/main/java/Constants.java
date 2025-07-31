@@ -122,15 +122,14 @@ public class Constants {
     public static final String DEFAULT_STOPPING_STRINGS = "";
     public static final String DEFAULT_BANNED_TOKENS = "";
     public static final boolean DEFAULT_IGNORE_EOS = false;
-    
-    // Dialog dimensions
-    public static final int ADVANCED_DIALOG_WIDTH = 500;
-    public static final int ADVANCED_DIALOG_HEIGHT = 400;
-    
+        
     // Main window dimensions
     public static final int MAIN_WINDOW_WIDTH = 1440;
     public static final int MAIN_WINDOW_HEIGHT = 1080;
-    
+   
+    // Settings dialog width
+    public static final int SETTINGS_DIALOG_WIDTH = 360;
+
     // Session defaults
     public static final String DEFAULT_ENDPOINT = "http://127.0.0.1:8080";
     public static final String DEFAULT_MODEL = "Qwen3-30B-A3B";

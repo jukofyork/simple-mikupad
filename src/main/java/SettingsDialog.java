@@ -98,7 +98,6 @@ public class SettingsDialog {
         shell = new Shell(parentShell, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.RESIZE);
         shell.setText("Generation Settings");
         shell.setLayout(new GridLayout(1, false));
-        shell.setSize(600, 600);
     }
     
     private void createContents() {
@@ -180,7 +179,7 @@ public class SettingsDialog {
         
         TableColumn samplerColumn = new TableColumn(samplersTable, SWT.NONE);
         samplerColumn.setText("Sampler");
-        samplerColumn.setWidth(200);
+        samplerColumn.setWidth(Constants.SETTINGS_DIALOG_WIDTH);
         
         // Populate table with all valid samplers
         for (String sampler : Constants.DEFAULT_SAMPLERS) {
@@ -412,7 +411,7 @@ public class SettingsDialog {
         content.setLayout(new GridLayout(1, false));
         
         Group templateGroup = new Group(content, SWT.NONE);
-        templateGroup.setText("Instruction Templates");
+        templateGroup.setText("Instruction Template");
         templateGroup.setLayout(new GridLayout(2, false));
         templateGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         
