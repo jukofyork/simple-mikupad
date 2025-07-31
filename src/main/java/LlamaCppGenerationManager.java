@@ -26,16 +26,16 @@ public class LlamaCppGenerationManager extends BaseGenerationManager {
 		JsonObject tokenizeRequest = new JsonObject();
 		tokenizeRequest.addProperty("content", prompt);
 		tokenizeRequest.addProperty("with_pieces", true);
-
+	
 		String requestBody = new Gson().toJson(tokenizeRequest);
-
+	
 		URI uri = URI.create(endpoint + "/tokenize");
 		HttpResponse<InputStream> response = app.getHttpClient().sendRequest(uri, apiKey.isEmpty() ? null : apiKey,
 				requestBody, false);
-
+	
 		if (isCancelled)
 			return;
-
+	
 		String responseBody;
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.body()))) {
 			StringBuilder responseBuilder = new StringBuilder();
@@ -45,18 +45,18 @@ public class LlamaCppGenerationManager extends BaseGenerationManager {
 			}
 			responseBody = responseBuilder.toString();
 		}
-
+	
 		JsonObject responseJson = JsonParser.parseString(responseBody).getAsJsonObject();
 		JsonArray tokenArray = responseJson.getAsJsonArray("tokens");
-
+	
 		int textOffset = 0;
-
+	
 		for (int i = 0; i < tokenArray.size(); i++) {
 			JsonElement tokenEntry = tokenArray.get(i);
-
+	
 			if (tokenEntry.isJsonObject()) {
 				JsonObject tokenMetadata = tokenEntry.getAsJsonObject();
-
+	
 				if (tokenMetadata.has("piece")) {
 					String tokenText = "";
 					JsonElement tokenPart = tokenMetadata.get("piece");
@@ -70,15 +70,17 @@ public class LlamaCppGenerationManager extends BaseGenerationManager {
 					} else {
 						tokenText = tokenPart.getAsString();
 					}
-
-					if (!tokenText.isEmpty()) {
+	
+					if (tokenText != null) {
 						final int startOffset = textOffset;
 						final int tokenLength = tokenText.length();
 						final int tokenIndex = i;
+						final String finalTokenText = tokenText;
 						app.getDisplay().asyncExec(() -> {
-							if (!isCancelled) {
-								app.getTokenManager().showPromptToken(startOffset, tokenLength, tokenIndex);
-							}
+						    if (!isCancelled) {
+						        app.getTokenManager().showPromptToken(startOffset, tokenLength, tokenIndex);
+						        app.getTokenManager().storeTokenInfo(startOffset, finalTokenText);
+						    }
 						});
 						textOffset += tokenText.length();
 					}

@@ -98,16 +98,25 @@ public class TokenManager {
     public void showPromptToken(int offset, int length, int tokenIndex) {
         if (app.getPromptText().isDisposed() || !coloringEnabled) return;
         
-        StyleRange style = new StyleRange();
-        style.start = offset;
-        style.length = length;
-        
-        // Alternate between the two blue shades
-        style.background = (tokenIndex % 2 == 0) ? promptColorDark : promptColorLight;
-        
-        app.getPromptText().setStyleRange(style);
+        // Only apply visual styling to tokens that have actual content
+        if (length > 0) {
+            StyleRange style = new StyleRange();
+            style.start = offset;
+            style.length = length;
+            
+            // Alternate between the two blue shades
+            style.background = (tokenIndex % 2 == 0) ? promptColorDark : promptColorLight;
+            
+            app.getPromptText().setStyleRange(style);
+        }
     }
     
+    public void storeTokenInfo(int offset, String tokenText) {
+        // Store prompt token info (no probability/alternatives for prompt tokens)
+        TokenInfo tokenInfo = new TokenInfo(tokenText, -1.0, null);
+        tokenMap.put(offset, tokenInfo);
+    }
+
     public void appendSingleToken(String token, double probability, List<TokenAlternative> alternatives) {
         if (app.getPromptText().isDisposed()) return;
         
@@ -169,10 +178,18 @@ public class TokenManager {
         for (Map.Entry<Integer, TokenInfo> entry : tokenMap.entrySet()) {
             int tokenStart = entry.getKey();
             TokenInfo tokenInfo = entry.getValue();
-            int tokenEnd = tokenStart + tokenInfo.text.length();
             
-            if (offset >= tokenStart && offset < tokenEnd) {
-                return tokenInfo;
+            if (tokenInfo.text.length() == 0) {
+                // Zero-length tokens are hoverable at their exact position
+                if (offset == tokenStart) {
+                    return tokenInfo;
+                }
+            } else {
+                // Normal tokens use range checking
+                int tokenEnd = tokenStart + tokenInfo.text.length();
+                if (offset >= tokenStart && offset < tokenEnd) {
+                    return tokenInfo;
+                }
             }
         }
         return null;
@@ -188,16 +205,23 @@ public class TokenManager {
         Label altLabel = new Label(currentTooltip, SWT.NONE);
         StringBuilder message = new StringBuilder();
         
-        if (tokenInfo.alternatives != null && !tokenInfo.alternatives.isEmpty()) {
-            boolean first = true;
-            for (TokenAlternative alt : tokenInfo.alternatives) {
-                double percentage = alt.probability * Constants.PERCENTAGE_MULTIPLIER;
-                if (Math.round(percentage * 10.0) / 10.0 > 0.0) {
-                    if (!first) {
-                        message.append("\n");
+        // Check if this is a prompt token (probability = -1.0 indicates prompt token)
+        if (tokenInfo.probability == -1.0) {
+            // Show just the token text in quotes for prompt tokens
+            message.append("\"").append(escapeForTooltip(tokenInfo.text)).append("\"");
+        } else {
+            // Show alternatives for generated tokens
+            if (tokenInfo.alternatives != null && !tokenInfo.alternatives.isEmpty()) {
+                boolean first = true;
+                for (TokenAlternative alt : tokenInfo.alternatives) {
+                    double percentage = alt.probability * Constants.PERCENTAGE_MULTIPLIER;
+                    if (Math.round(percentage * 10.0) / 10.0 > 0.0) {
+                        if (!first) {
+                            message.append("\n");
+                        }
+                        message.append(String.format("%.1f%% - \"%s\"", percentage, escapeForTooltip(alt.token)));
+                        first = false;
                     }
-                    message.append(String.format("%.1f%% - \"%s\"", percentage, escapeForTooltip(alt.token)));
-                    first = false;
                 }
             }
         }
