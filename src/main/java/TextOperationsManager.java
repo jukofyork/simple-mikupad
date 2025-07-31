@@ -178,6 +178,12 @@ public class TextOperationsManager {
                         executeTextOperation("redo");
                         e.doit = false;
                     }
+                } else if (e.keyCode == 'a' || e.keyCode == 'A') {
+                    if ((e.stateMask & SWT.MODIFIER_MASK) == SWT.MOD1) {
+                        // Ctrl+A for select all
+                        executeTextOperation("selectAll");
+                        e.doit = false;
+                    }
                 }
             }
         });
