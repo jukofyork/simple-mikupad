@@ -21,8 +21,8 @@ public class Session {
     private String apiKey;
     private String model;
     
-    // Sampling Parameters
-    private SamplingParameters samplingParams;
+    // Generation Settings
+    private Settings settings;
     
     /**
      * Creates a new session with default values
@@ -39,8 +39,8 @@ public class Session {
         this.apiKey = "";
         this.model = Constants.DEFAULT_MODEL;
         
-        // Default sampling parameters
-        this.samplingParams = new SamplingParameters();
+        // Default generation settings
+        this.settings = new Settings();
     }
     
     /**
@@ -64,7 +64,7 @@ public class Session {
         this.endpoint = other.endpoint;
         this.apiKey = other.apiKey;
         this.model = other.model;
-        this.samplingParams = new SamplingParameters(other.samplingParams);
+        this.settings = new Settings(other.settings);
     }
     
     /**
@@ -89,8 +89,8 @@ public class Session {
         json.addProperty("apiKey", apiKey);
         json.addProperty("model", model);
         
-        // Save sampling parameters
-        json.add("samplingParams", samplingParams.toSessionJson());
+        // Save generation settings
+        json.add("settings", settings.toSessionJson());
         
         return json;
     }
@@ -111,17 +111,18 @@ public class Session {
         session.apiKey = json.get("apiKey").getAsString();
         session.model = json.get("model").getAsString();
         
-        // Load sampling parameters
-        if (json.has("samplingParams")) {
-            session.samplingParams = SamplingParameters.fromJson(json.getAsJsonObject("samplingParams"));
+        // Load generation settings
+        if (json.has("settings") || json.has("samplingParams")) {
+            JsonObject settingsJson = json.has("settings") ? json.getAsJsonObject("settings") : json.getAsJsonObject("samplingParams");
+            session.settings = Settings.fromJson(settingsJson);
         } else {
             // Backward compatibility - convert old temperature/maxTokens
-            session.samplingParams = new SamplingParameters();
+            session.settings = new Settings();
             if (json.has("temperature")) {
-                session.samplingParams.setTemperature(json.get("temperature").getAsDouble());
+                session.settings.setTemperature(json.get("temperature").getAsDouble());
             }
             if (json.has("maxTokens")) {
-                session.samplingParams.setMaxTokens(json.get("maxTokens").getAsInt());
+                session.settings.setMaxTokens(json.get("maxTokens").getAsInt());
             }
         }
         
@@ -164,9 +165,9 @@ public class Session {
         touch();
     }
     
-    public SamplingParameters getSamplingParams() { return samplingParams; }
-    public void setSamplingParams(SamplingParameters samplingParams) { 
-        this.samplingParams = samplingParams; 
+    public Settings getSettings() { return settings; }
+    public void setSettings(Settings settings) { 
+        this.settings = settings; 
         touch();
     }
     

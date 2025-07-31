@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
  * Comprehensive parameters for text generation including sampling parameters,
  * advanced constraints, and generation settings.
  */
-public class SamplingParameters {
+public class Settings {
     
     // Basic parameters
     private int seed = Constants.DEFAULT_SEED;
@@ -85,14 +85,14 @@ public class SamplingParameters {
     private boolean dryEnabled = Constants.DEFAULT_DRY_ENABLED;
     private boolean maxTokensEnabled = Constants.DEFAULT_MAX_TOKENS_ENABLED;
     
-    public SamplingParameters() {
+    public Settings() {
         // Default constructor with sensible defaults
     }
     
     /**
      * Copy constructor
      */
-    public SamplingParameters(SamplingParameters other) {
+    public Settings(Settings other) {
         this.seed = other.seed;
         this.temperature = other.temperature;
         this.maxTokens = other.maxTokens;
@@ -335,8 +335,8 @@ public class SamplingParameters {
     /**
      * Loads from JSON (for session persistence)
      */
-    public static SamplingParameters fromJson(JsonObject json) {
-        SamplingParameters params = new SamplingParameters();
+    public static Settings fromJson(JsonObject json) {
+        Settings params = new Settings();
         
         if (json.has("seed")) params.seed = json.get("seed").getAsInt();
         if (json.has("temperature")) params.temperature = json.get("temperature").getAsDouble();

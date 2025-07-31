@@ -8,17 +8,17 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 
 /**
- * Tabbed dialog for configuring comprehensive generation parameters.
+ * Tabbed dialog for configuring comprehensive generation settings.
  * Organized into logical tabs for better usability.
  */
-public class SamplingParametersDialog {
+public class SettingsDialog {
     
     private Shell shell;
     private Shell parentShell;
-    private SamplingParameters parameters;
+    private Settings settings;
     private boolean result = false;
     
-    // Parameter controls
+    // Settings controls
     private ParameterControl seedControl;
     private Table samplersTable;
     private Button samplersUpButton;
@@ -66,15 +66,15 @@ public class SamplingParametersDialog {
     
     private boolean isLoadingTemplate = false;
     
-    public SamplingParametersDialog(Shell parent, SamplingParameters parameters) {
+    public SettingsDialog(Shell parent, Settings settings) {
         this.parentShell = parent;
-        this.parameters = new SamplingParameters(parameters); // Work on a copy
+        this.settings = new Settings(settings); // Work on a copy
     }
     
     public boolean open() {
         createShell();
         createContents();
-        loadParameters();
+        loadSettings();
         
         shell.pack();
         centerOnParent();
@@ -90,8 +90,8 @@ public class SamplingParametersDialog {
         return result;
     }
     
-    public SamplingParameters getParameters() {
-        return parameters;
+    public Settings getSettings() {
+        return settings;
     }
     
     private void createShell() {
@@ -471,7 +471,7 @@ public class SamplingParametersDialog {
         okButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                if (saveParameters()) {
+                if (saveSettings()) {
                     result = true;
                     shell.close();
                 }
@@ -494,7 +494,7 @@ public class SamplingParametersDialog {
         resetButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                resetToDefaults();
+                resetSettingsToDefaults();
             }
         });
         
@@ -653,71 +653,71 @@ public class SamplingParametersDialog {
         return String.join(",", enabledSamplers);
     }
     
-    private void loadParameters() {
+    private void loadSettings() {
         // Basic tab
-        seedControl.setIntValue(parameters.getSeed());
-        seedControl.setEnabled(parameters.isSeedEnabled());
-        loadSamplersTable(parameters.getSamplers());
-        temperatureControl.setDoubleValue(parameters.getTemperature());
-        temperatureControl.setEnabled(parameters.isTemperatureEnabled());
-        maxTokensControl.setIntValue(parameters.getMaxTokens());
-        maxTokensControl.setEnabled(parameters.isMaxTokensEnabled());
-        topPControl.setDoubleValue(parameters.getTopP());
-        topPControl.setEnabled(parameters.isTopPEnabled());
-        topKControl.setIntValue(parameters.getTopK());
-        topKControl.setEnabled(parameters.isTopKEnabled());
-        minPControl.setDoubleValue(parameters.getMinP());
-        minPControl.setEnabled(parameters.isMinPEnabled());
+        seedControl.setIntValue(settings.getSeed());
+        seedControl.setEnabled(settings.isSeedEnabled());
+        loadSamplersTable(settings.getSamplers());
+        temperatureControl.setDoubleValue(settings.getTemperature());
+        temperatureControl.setEnabled(settings.isTemperatureEnabled());
+        maxTokensControl.setIntValue(settings.getMaxTokens());
+        maxTokensControl.setEnabled(settings.isMaxTokensEnabled());
+        topPControl.setDoubleValue(settings.getTopP());
+        topPControl.setEnabled(settings.isTopPEnabled());
+        topKControl.setIntValue(settings.getTopK());
+        topKControl.setEnabled(settings.isTopKEnabled());
+        minPControl.setDoubleValue(settings.getMinP());
+        minPControl.setEnabled(settings.isMinPEnabled());
         
         // Repetition tab
-        repeatPenaltyControl.setDoubleValue(parameters.getRepeatPenalty());
-        repeatPenaltyControl.setEnabled(parameters.isRepeatPenaltyEnabled());
-        repeatLastNControl.setIntValue(parameters.getRepeatLastN());
-        repeatLastNControl.setEnabled(parameters.isRepeatLastNEnabled());
-        presencePenaltyControl.setDoubleValue(parameters.getPresencePenalty());
-        presencePenaltyControl.setEnabled(parameters.isPresencePenaltyEnabled());
-        frequencyPenaltyControl.setDoubleValue(parameters.getFrequencyPenalty());
-        frequencyPenaltyControl.setEnabled(parameters.isFrequencyPenaltyEnabled());
-        penalizeNlCheck.setSelection(parameters.isPenalizeNl());
+        repeatPenaltyControl.setDoubleValue(settings.getRepeatPenalty());
+        repeatPenaltyControl.setEnabled(settings.isRepeatPenaltyEnabled());
+        repeatLastNControl.setIntValue(settings.getRepeatLastN());
+        repeatLastNControl.setEnabled(settings.isRepeatLastNEnabled());
+        presencePenaltyControl.setDoubleValue(settings.getPresencePenalty());
+        presencePenaltyControl.setEnabled(settings.isPresencePenaltyEnabled());
+        frequencyPenaltyControl.setDoubleValue(settings.getFrequencyPenalty());
+        frequencyPenaltyControl.setEnabled(settings.isFrequencyPenaltyEnabled());
+        penalizeNlCheck.setSelection(settings.isPenalizeNl());
         
         // Advanced tab
-        typicalPControl.setDoubleValue(parameters.getTypicalP());
-        typicalPControl.setEnabled(parameters.isTypicalPEnabled());
-        tfsZControl.setDoubleValue(parameters.getTfsZ());
-        tfsZControl.setEnabled(parameters.isTfsZEnabled());
-        mirostatCombo.select(parameters.getMirostat());
-        mirostatTauControl.setDoubleValue(parameters.getMirostatTau());
-        mirostatEtaControl.setDoubleValue(parameters.getMirostatEta());
-        dynatempRangeControl.setDoubleValue(parameters.getDynatempRange());
-        dynatempRangeControl.setEnabled(parameters.isDynatempEnabled());
-        dynatempExponentControl.setDoubleValue(parameters.getDynatempExponent());
-        xtcThresholdControl.setDoubleValue(parameters.getXtcThreshold());
-        xtcProbabilityControl.setDoubleValue(parameters.getXtcProbability());
-        xtcProbabilityControl.setEnabled(parameters.isXtcEnabled());
-        dryMultiplierControl.setDoubleValue(parameters.getDryMultiplier());
-        dryMultiplierControl.setEnabled(parameters.isDryEnabled());
-        dryBaseControl.setDoubleValue(parameters.getDryBase());
-        dryAllowedLengthControl.setIntValue(parameters.getDryAllowedLength());
-        drySequenceBreakersText.setText(parameters.getDrySequenceBreakers());
-        dryPenaltyLastNControl.setIntValue(parameters.getDryPenaltyLastN());
+        typicalPControl.setDoubleValue(settings.getTypicalP());
+        typicalPControl.setEnabled(settings.isTypicalPEnabled());
+        tfsZControl.setDoubleValue(settings.getTfsZ());
+        tfsZControl.setEnabled(settings.isTfsZEnabled());
+        mirostatCombo.select(settings.getMirostat());
+        mirostatTauControl.setDoubleValue(settings.getMirostatTau());
+        mirostatEtaControl.setDoubleValue(settings.getMirostatEta());
+        dynatempRangeControl.setDoubleValue(settings.getDynatempRange());
+        dynatempRangeControl.setEnabled(settings.isDynatempEnabled());
+        dynatempExponentControl.setDoubleValue(settings.getDynatempExponent());
+        xtcThresholdControl.setDoubleValue(settings.getXtcThreshold());
+        xtcProbabilityControl.setDoubleValue(settings.getXtcProbability());
+        xtcProbabilityControl.setEnabled(settings.isXtcEnabled());
+        dryMultiplierControl.setDoubleValue(settings.getDryMultiplier());
+        dryMultiplierControl.setEnabled(settings.isDryEnabled());
+        dryBaseControl.setDoubleValue(settings.getDryBase());
+        dryAllowedLengthControl.setIntValue(settings.getDryAllowedLength());
+        drySequenceBreakersText.setText(settings.getDrySequenceBreakers());
+        dryPenaltyLastNControl.setIntValue(settings.getDryPenaltyLastN());
         
         // Constraints tab
-        grammarText.setText(parameters.getGrammar());
-        jsonSchemaText.setText(parameters.getJsonSchema());
-        logitBiasText.setText(parameters.getLogitBias());
-        stoppingStringsText.setText(parameters.getStoppingStrings());
-        bannedTokensText.setText(parameters.getBannedTokens());
-        ignoreEosCheck.setSelection(parameters.isIgnoreEos());
+        grammarText.setText(settings.getGrammar());
+        jsonSchemaText.setText(settings.getJsonSchema());
+        logitBiasText.setText(settings.getLogitBias());
+        stoppingStringsText.setText(settings.getStoppingStrings());
+        bannedTokensText.setText(settings.getBannedTokens());
+        ignoreEosCheck.setSelection(settings.isIgnoreEos());
         
         isLoadingTemplate = true;
         try {
         // Templates tab
-        templateCombo.setText(parameters.getTemplateName());
-        templateSysPrefixText.setText(parameters.getTemplateSysPrefix());
-        templateSysSuffixText.setText(parameters.getTemplateSysSuffix());
-        templateInstPrefixText.setText(parameters.getTemplateInstPrefix());
-        templateInstSuffixText.setText(parameters.getTemplateInstSuffix());
-        templateEosText.setText(parameters.getTemplateEos());
+        templateCombo.setText(settings.getTemplateName());
+        templateSysPrefixText.setText(settings.getTemplateSysPrefix());
+        templateSysSuffixText.setText(settings.getTemplateSysSuffix());
+        templateInstPrefixText.setText(settings.getTemplateInstPrefix());
+        templateInstSuffixText.setText(settings.getTemplateInstSuffix());
+        templateEosText.setText(settings.getTemplateEos());
         } finally {
             isLoadingTemplate = false;
         }
@@ -725,83 +725,83 @@ public class SamplingParametersDialog {
         updateEnabledStates();
     }
     
-    private boolean saveParameters() {
-        // Validate all parameters first
-        if (!validateParameters()) {
+    private boolean saveSettings() {
+        // Validate all settings first
+        if (!validateSettings()) {
             return false;
         }
         
         // Basic tab
-        parameters.setSeed(seedControl.getIntValue());
-        parameters.setSeedEnabled(seedControl.isEnabled());
+        settings.setSeed(seedControl.getIntValue());
+        settings.setSeedEnabled(seedControl.isEnabled());
         String currentSamplers = getSamplersFromTable();
-        parameters.setSamplers(currentSamplers);
-        parameters.setSamplersEnabled(!currentSamplers.equals(String.join(",", Constants.DEFAULT_SAMPLERS)));
-        parameters.setTemperature(temperatureControl.getDoubleValue());
-        parameters.setTemperatureEnabled(temperatureControl.isEnabled());
-        parameters.setMaxTokens(maxTokensControl.getIntValue());
-        parameters.setMaxTokensEnabled(maxTokensControl.isEnabled());
-        parameters.setTopP(topPControl.getDoubleValue());
-        parameters.setTopPEnabled(topPControl.isEnabled());
-        parameters.setTopK(topKControl.getIntValue());
-        parameters.setTopKEnabled(topKControl.isEnabled());
-        parameters.setMinP(minPControl.getDoubleValue());
-        parameters.setMinPEnabled(minPControl.isEnabled());
+        settings.setSamplers(currentSamplers);
+        settings.setSamplersEnabled(!currentSamplers.equals(String.join(",", Constants.DEFAULT_SAMPLERS)));
+        settings.setTemperature(temperatureControl.getDoubleValue());
+        settings.setTemperatureEnabled(temperatureControl.isEnabled());
+        settings.setMaxTokens(maxTokensControl.getIntValue());
+        settings.setMaxTokensEnabled(maxTokensControl.isEnabled());
+        settings.setTopP(topPControl.getDoubleValue());
+        settings.setTopPEnabled(topPControl.isEnabled());
+        settings.setTopK(topKControl.getIntValue());
+        settings.setTopKEnabled(topKControl.isEnabled());
+        settings.setMinP(minPControl.getDoubleValue());
+        settings.setMinPEnabled(minPControl.isEnabled());
         
         // Repetition tab
-        parameters.setRepeatPenalty(repeatPenaltyControl.getDoubleValue());
-        parameters.setRepeatPenaltyEnabled(repeatPenaltyControl.isEnabled());
-        parameters.setRepeatLastN(repeatLastNControl.getIntValue());
-        parameters.setRepeatLastNEnabled(repeatLastNControl.isEnabled());
-        parameters.setPresencePenalty(presencePenaltyControl.getDoubleValue());
-        parameters.setPresencePenaltyEnabled(presencePenaltyControl.isEnabled());
-        parameters.setFrequencyPenalty(frequencyPenaltyControl.getDoubleValue());
-        parameters.setFrequencyPenaltyEnabled(frequencyPenaltyControl.isEnabled());
-        parameters.setPenalizeNl(penalizeNlCheck.getSelection());
+        settings.setRepeatPenalty(repeatPenaltyControl.getDoubleValue());
+        settings.setRepeatPenaltyEnabled(repeatPenaltyControl.isEnabled());
+        settings.setRepeatLastN(repeatLastNControl.getIntValue());
+        settings.setRepeatLastNEnabled(repeatLastNControl.isEnabled());
+        settings.setPresencePenalty(presencePenaltyControl.getDoubleValue());
+        settings.setPresencePenaltyEnabled(presencePenaltyControl.isEnabled());
+        settings.setFrequencyPenalty(frequencyPenaltyControl.getDoubleValue());
+        settings.setFrequencyPenaltyEnabled(frequencyPenaltyControl.isEnabled());
+        settings.setPenalizeNl(penalizeNlCheck.getSelection());
         
         // Advanced tab
-        parameters.setTypicalP(typicalPControl.getDoubleValue());
-        parameters.setTypicalPEnabled(typicalPControl.isEnabled());
-        parameters.setTfsZ(tfsZControl.getDoubleValue());
-        parameters.setTfsZEnabled(tfsZControl.isEnabled());
-        parameters.setMirostat(mirostatCombo.getSelectionIndex());
-        parameters.setMirostatEnabled(mirostatCombo.getSelectionIndex() > 0);
-        parameters.setMirostatTau(mirostatTauControl.getDoubleValue());
-        parameters.setMirostatEta(mirostatEtaControl.getDoubleValue());
-        parameters.setDynatempRange(dynatempRangeControl.getDoubleValue());
-        parameters.setDynatempEnabled(dynatempRangeControl.getDoubleValue() > 0);
-        parameters.setDynatempExponent(dynatempExponentControl.getDoubleValue());
-        parameters.setXtcThreshold(xtcThresholdControl.getDoubleValue());
-        parameters.setXtcProbability(xtcProbabilityControl.getDoubleValue());
-        parameters.setXtcEnabled(xtcProbabilityControl.getDoubleValue() > 0);
-        parameters.setDryMultiplier(dryMultiplierControl.getDoubleValue());
-        parameters.setDryEnabled(dryMultiplierControl.getDoubleValue() > 0);
-        parameters.setDryBase(dryBaseControl.getDoubleValue());
-        parameters.setDryAllowedLength(dryAllowedLengthControl.getIntValue());
-        parameters.setDrySequenceBreakers(drySequenceBreakersText.getText());
-        parameters.setDryPenaltyLastN(dryPenaltyLastNControl.getIntValue());
+        settings.setTypicalP(typicalPControl.getDoubleValue());
+        settings.setTypicalPEnabled(typicalPControl.isEnabled());
+        settings.setTfsZ(tfsZControl.getDoubleValue());
+        settings.setTfsZEnabled(tfsZControl.isEnabled());
+        settings.setMirostat(mirostatCombo.getSelectionIndex());
+        settings.setMirostatEnabled(mirostatCombo.getSelectionIndex() > 0);
+        settings.setMirostatTau(mirostatTauControl.getDoubleValue());
+        settings.setMirostatEta(mirostatEtaControl.getDoubleValue());
+        settings.setDynatempRange(dynatempRangeControl.getDoubleValue());
+        settings.setDynatempEnabled(dynatempRangeControl.getDoubleValue() > 0);
+        settings.setDynatempExponent(dynatempExponentControl.getDoubleValue());
+        settings.setXtcThreshold(xtcThresholdControl.getDoubleValue());
+        settings.setXtcProbability(xtcProbabilityControl.getDoubleValue());
+        settings.setXtcEnabled(xtcProbabilityControl.getDoubleValue() > 0);
+        settings.setDryMultiplier(dryMultiplierControl.getDoubleValue());
+        settings.setDryEnabled(dryMultiplierControl.getDoubleValue() > 0);
+        settings.setDryBase(dryBaseControl.getDoubleValue());
+        settings.setDryAllowedLength(dryAllowedLengthControl.getIntValue());
+        settings.setDrySequenceBreakers(drySequenceBreakersText.getText());
+        settings.setDryPenaltyLastN(dryPenaltyLastNControl.getIntValue());
         
         // Constraints tab
-        parameters.setGrammar(grammarText.getText());
-        parameters.setJsonSchema(jsonSchemaText.getText());
-        parameters.setLogitBias(logitBiasText.getText());
-        parameters.setStoppingStrings(stoppingStringsText.getText());
-        parameters.setBannedTokens(bannedTokensText.getText());
-        parameters.setIgnoreEos(ignoreEosCheck.getSelection());
+        settings.setGrammar(grammarText.getText());
+        settings.setJsonSchema(jsonSchemaText.getText());
+        settings.setLogitBias(logitBiasText.getText());
+        settings.setStoppingStrings(stoppingStringsText.getText());
+        settings.setBannedTokens(bannedTokensText.getText());
+        settings.setIgnoreEos(ignoreEosCheck.getSelection());
         
         // Templates tab
-        parameters.setTemplateName(templateCombo.getText());
-        parameters.setTemplateSysPrefix(templateSysPrefixText.getText());
-        parameters.setTemplateSysSuffix(templateSysSuffixText.getText());
-        parameters.setTemplateInstPrefix(templateInstPrefixText.getText());
-        parameters.setTemplateInstSuffix(templateInstSuffixText.getText());
-        parameters.setTemplateEos(templateEosText.getText());
+        settings.setTemplateName(templateCombo.getText());
+        settings.setTemplateSysPrefix(templateSysPrefixText.getText());
+        settings.setTemplateSysSuffix(templateSysSuffixText.getText());
+        settings.setTemplateInstPrefix(templateInstPrefixText.getText());
+        settings.setTemplateInstSuffix(templateInstSuffixText.getText());
+        settings.setTemplateEos(templateEosText.getText());
         
         return true;
     }
     
-    private boolean validateParameters() {
-        // Check all parameter controls for validity
+    private boolean validateSettings() {
+        // Check all settings controls for validity
         ParameterControl[] controls = {
             seedControl, temperatureControl, maxTokensControl, topPControl, topKControl,
             minPControl, typicalPControl, tfsZControl, repeatPenaltyControl,
@@ -814,7 +814,7 @@ public class SamplingParametersDialog {
         for (ParameterControl control : controls) {
             if (!control.isValid()) {
                 MessageBox messageBox = new MessageBox(shell, SWT.ERROR | SWT.OK);
-                messageBox.setMessage("Invalid parameter value. Please check highlighted fields.");
+                messageBox.setMessage("Invalid setting value. Please check highlighted fields.");
                 messageBox.setText("Validation Error");
                 messageBox.open();
                 return false;
@@ -824,9 +824,9 @@ public class SamplingParametersDialog {
         return true;
     }
     
-    private void resetToDefaults() {
-        parameters = new SamplingParameters();
-        loadParameters();
+    private void resetSettingsToDefaults() {
+        settings = new Settings();
+        loadSettings();
     }
     
     private void centerOnParent() {

@@ -126,8 +126,8 @@ public class TextOperationsManager {
                 boolean hasSelection = app.getPromptText().getSelectionCount() > 0;
                 
                 if (hasSelection) {
-                    wrapSystemItem.setText("Wrap System Message");
-                    wrapInstructionItem.setText("Wrap User Prompt");
+                    wrapSystemItem.setText("Wrap as System Message");
+                    wrapInstructionItem.setText("Wrap as User Prompt");
                     addEosItem.setText("Replace with EOS");
                 } else {
                     wrapSystemItem.setText("Insert System Message");
@@ -144,15 +144,15 @@ public class TextOperationsManager {
         if (app.getPromptText().isDisposed()) return;
         
         Session currentSession = app.getSessionManager().getCurrentSession();
-        SamplingParameters params = currentSession.getSamplingParams();
+        Settings settings = currentSession.getSettings();
         String prefix, suffix;
         
         if ("system".equals(type)) {
-            prefix = Constants.processEscapeSequences(params.getTemplateSysPrefix());
-            suffix = Constants.processEscapeSequences(params.getTemplateSysSuffix());
+            prefix = Constants.processEscapeSequences(settings.getTemplateSysPrefix());
+            suffix = Constants.processEscapeSequences(settings.getTemplateSysSuffix());
         } else { // instruction
-            prefix = Constants.processEscapeSequences(params.getTemplateInstPrefix());
-            suffix = Constants.processEscapeSequences(params.getTemplateInstSuffix());
+            prefix = Constants.processEscapeSequences(settings.getTemplateInstPrefix());
+            suffix = Constants.processEscapeSequences(settings.getTemplateInstSuffix());
         }
         
         Point selection = app.getPromptText().getSelection();
@@ -169,8 +169,8 @@ public class TextOperationsManager {
         if (app.getPromptText().isDisposed()) return;
         
         Session currentSession = app.getSessionManager().getCurrentSession();
-        SamplingParameters params = currentSession.getSamplingParams();
-        String eosToken = Constants.processEscapeSequences(params.getTemplateEos());
+        Settings settings = currentSession.getSettings();
+        String eosToken = Constants.processEscapeSequences(settings.getTemplateEos());
         
         Point selection = app.getPromptText().getSelection();
         app.getPromptText().replaceTextRange(selection.x, selection.y - selection.x, eosToken);

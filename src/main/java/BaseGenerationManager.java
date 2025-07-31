@@ -56,7 +56,7 @@ public abstract class BaseGenerationManager {
 		String prompt = app.getPromptText().getText();
 
 		Session currentSession = app.getSessionManager().getCurrentSession();
-		SamplingParameters samplingParams = currentSession.getSamplingParams();
+		Settings settings = currentSession.getSettings();
 
 		ProbabilitySettings probabilitySettings = new ProbabilitySettings(Constants.DEFAULT_TOKEN_ALTERNATIVES_COUNT,
 				false, false, 0);
@@ -76,7 +76,7 @@ public abstract class BaseGenerationManager {
 					app.updateStatus("Generating completion...");
 				});
 
-				JsonObject request = buildRequest(prompt, samplingParams, probabilitySettings);
+				JsonObject request = buildRequest(prompt, settings, probabilitySettings);
 
 				if (!model.isEmpty()) {
 					request.addProperty("model", model);
@@ -178,9 +178,9 @@ public abstract class BaseGenerationManager {
 		}
 	}
 
-	protected JsonObject buildRequest(String prompt, SamplingParameters params,
+	protected JsonObject buildRequest(String prompt, Settings settings,
 			ProbabilitySettings probSettings) {
-		JsonObject request = params.toJson();
+		JsonObject request = settings.toJson();
 		request.addProperty("prompt", prompt);
 		request.addProperty("stream", true);
 		probSettings.addToRequest(request);

@@ -27,8 +27,8 @@ public class SimpleMikuPad {
     private Text endpointText;
     private Text apiKeyText;
     private Text modelText;
-    private Button samplingParamsButton;
-    private Label samplingParamsLabel;
+    private Button settingsButton;
+    private Label settingsLabel;
     private Button generateButton;
     private Button cancelButton;
     private Label statusLabel;
@@ -145,8 +145,8 @@ public class SimpleMikuPad {
     public Text getEndpointText() { return endpointText; }
     public Text getApiKeyText() { return apiKeyText; }
     public Text getModelText() { return modelText; }
-    public Button getSamplingParamsButton() { return samplingParamsButton; }
-    public Label getSamplingParamsLabel() { return samplingParamsLabel; }
+    public Button getSettingsButton() { return settingsButton; }
+    public Label getSettingsLabel() { return settingsLabel; }
     public Button getGenerateButton() { return generateButton; }
     public Button getCancelButton() { return cancelButton; }
     public Label getStatusLabel() { return statusLabel; }
@@ -172,8 +172,8 @@ public class SimpleMikuPad {
     public void setEndpointText(Text endpointText) { this.endpointText = endpointText; }
     public void setApiKeyText(Text apiKeyText) { this.apiKeyText = apiKeyText; }
     public void setModelText(Text modelText) { this.modelText = modelText; }
-    public void setSamplingParamsButton(Button samplingParamsButton) { this.samplingParamsButton = samplingParamsButton; }
-    public void setSamplingParamsLabel(Label samplingParamsLabel) { this.samplingParamsLabel = samplingParamsLabel; }
+    public void setSettingsButton(Button settingsButton) { this.settingsButton = settingsButton; }
+    public void setSettingsLabel(Label settingsLabel) { this.settingsLabel = settingsLabel; }
     public void setGenerateButton(Button generateButton) { this.generateButton = generateButton; }
     public void setCancelButton(Button cancelButton) { this.cancelButton = cancelButton; }
     public void setStatusLabel(Label statusLabel) { this.statusLabel = statusLabel; }

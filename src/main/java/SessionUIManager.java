@@ -73,11 +73,11 @@ public class SessionUIManager {
             }
         });
         
-        // Sampling parameters button
-        app.getSamplingParamsButton().addSelectionListener(new SelectionAdapter() {
+        // Settings button
+        app.getSettingsButton().addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                openSamplingParametersDialog();
+                openSettingsDialog();
             }
         });
         
@@ -138,7 +138,7 @@ public class SessionUIManager {
             app.getModelText().setText(session.getModel());
             app.getPromptText().setText(session.getPromptText());
             
-            updateSamplingParamsLabel();
+            updateSettingsLabel();
             app.getTokenManager().clearTokenColoring();
             app.updateStatus("Loaded session: " + session.getName());
         } finally {
@@ -286,26 +286,26 @@ public class SessionUIManager {
         }
     }
     
-    private void openSamplingParametersDialog() {
+    private void openSettingsDialog() {
         Session currentSession = app.getSessionManager().getCurrentSession();
         if (currentSession != null) {
-            SamplingParametersDialog dialog = new SamplingParametersDialog(app.getShell(), currentSession.getSamplingParams());
+            SettingsDialog dialog = new SettingsDialog(app.getShell(), currentSession.getSettings());
             if (dialog.open()) {
-                currentSession.setSamplingParams(dialog.getParameters());
-                updateSamplingParamsLabel();
+                currentSession.setSettings(dialog.getSettings());
+                updateSettingsLabel();
                 autoSaveSessionState();
-                app.updateStatus("Sampling parameters updated");
+                app.updateStatus("Generation settings updated");
             }
         }
     }
     
-    private void updateSamplingParamsLabel() {
+    private void updateSettingsLabel() {
         Session currentSession = app.getSessionManager().getCurrentSession();
-        if (currentSession != null && app.getSamplingParamsLabel() != null) {
-            SamplingParameters params = currentSession.getSamplingParams();
+        if (currentSession != null && app.getSettingsLabel() != null) {
+            Settings settings = currentSession.getSettings();
             String summary = String.format("Temp: %.2f, Top-K: %d, Top-P: %.2f, Min-P: %.2f", 
-                params.getTemperature(), params.getTopK(), params.getTopP(), params.getMinP());
-            app.getSamplingParamsLabel().setText(summary);
+                settings.getTemperature(), settings.getTopK(), settings.getTopP(), settings.getMinP());
+            app.getSettingsLabel().setText(summary);
         }
     }
     

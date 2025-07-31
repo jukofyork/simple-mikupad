@@ -26,7 +26,7 @@ public class UIManager {
         
         createSessionGroup();
         createModelSettingsGroup();
-        createSamplingGroup();
+        createGenerationSettingsGroup();
         createFontGroup();
         createPromptArea();
         createControlButtons();
@@ -96,9 +96,9 @@ public class UIManager {
         app.setModelText(modelText);
     }
     
-    private void createSamplingGroup() {
+    private void createGenerationSettingsGroup() {
         Group samplingGroup = new Group(app.getShell(), SWT.NONE);
-        samplingGroup.setText("Sampling Parameters");
+        samplingGroup.setText("Generation Settings");
         samplingGroup.setLayout(new GridLayout(1, false));
         samplingGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
         
@@ -108,11 +108,11 @@ public class UIManager {
         
         Button samplingParamsButton = new Button(samplingComp, SWT.PUSH);
         samplingParamsButton.setText("Configure...");
-        app.setSamplingParamsButton(samplingParamsButton);
+        app.setSettingsButton(samplingParamsButton);
         
         Label samplingParamsLabel = new Label(samplingComp, SWT.NONE);
         samplingParamsLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-        app.setSamplingParamsLabel(samplingParamsLabel);
+        app.setSettingsLabel(samplingParamsLabel);
     }
     
     private void createFontGroup() {
