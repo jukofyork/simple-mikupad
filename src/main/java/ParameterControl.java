@@ -13,7 +13,7 @@ import org.eclipse.swt.widgets.Text;
 
 /**
  * A reusable parameter control widget with checkbox, label, and value input.
- * Supports both integer and double values with proper precision.
+ * Supports integer, double, and string values with proper validation.
  */
 public class ParameterControl extends Composite {
     
@@ -31,6 +31,7 @@ public class ParameterControl extends Composite {
     private double minValue;
     private double maxValue;
     private int decimalPlaces;
+    private String stringValue;
     private ParameterChangeListener changeListener;
     
     /**
@@ -60,6 +61,17 @@ public class ParameterControl extends Composite {
         this.decimalPlaces = 0;
         
         createUI(name, String.valueOf(defaultValue), defaultEnabled);
+    }
+    
+    /**
+     * Creates a string parameter control
+     */
+    public ParameterControl(Composite parent, String name, String defaultValue, boolean defaultEnabled) {
+        super(parent, SWT.NONE);
+        this.isInteger = false;
+        this.stringValue = defaultValue;
+        
+        createStringUI(name, defaultValue, defaultEnabled);
     }
     
     private void createUI(String name, String defaultValue, boolean defaultEnabled) {
@@ -113,6 +125,8 @@ public class ParameterControl extends Composite {
         if (isInteger) {
             if (name.toLowerCase().contains("seed")) {
                 rangeLabel.setText("(-1 = random)");
+            } else if (name.toLowerCase().contains("max tokens")) {
+                rangeLabel.setText("(-1 = unlimited)");
             } else if (name.toLowerCase().contains("repeat last n")) {
                 rangeLabel.setText("(0=disabled, -1=ctx_size)");
             } else {
@@ -126,6 +140,38 @@ public class ParameterControl extends Composite {
         updateEnabledState();
     }
     
+    private void createStringUI(String name, String defaultValue, boolean defaultEnabled) {
+        setLayout(new GridLayout(3, false));
+        setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+        
+        // Enabled checkbox
+        enabledCheckbox = new Button(this, SWT.CHECK);
+        enabledCheckbox.setSelection(defaultEnabled);
+        enabledCheckbox.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                updateEnabledState();
+                notifyChange();
+            }
+        });
+        
+        // Parameter name label
+        nameLabel = new Label(this, SWT.NONE);
+        nameLabel.setText(name + ":");
+        nameLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+        
+        // Value input
+        valueText = new Text(this, SWT.BORDER);
+        valueText.setText(defaultValue);
+        valueText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+        valueText.addModifyListener(e -> {
+            stringValue = valueText.getText();
+            notifyChange();
+        });
+        
+        updateEnabledState();
+    }
+    
     private void updateEnabledState() {
         boolean enabled = enabledCheckbox.getSelection();
         nameLabel.setEnabled(enabled);
@@ -135,7 +181,9 @@ public class ParameterControl extends Composite {
         if (intSpinner != null) {
             intSpinner.setEnabled(enabled);
         }
-        rangeLabel.setEnabled(enabled);
+        if (rangeLabel != null) {
+            rangeLabel.setEnabled(enabled);
+        }
     }
     
     private void validateDoubleInput() {
@@ -218,6 +266,18 @@ public class ParameterControl extends Composite {
         }
     }
     
+    public String getStringValue() {
+        if (stringValue != null) {
+            return stringValue;
+        }
+        return valueText != null ? valueText.getText() : "";
+    }
+    
+    public void setStringValue(String value) {
+        this.stringValue = value;
+        if (valueText != null) valueText.setText(value != null ? value : "");
+    }
+    
     public boolean isValid() {
         if (!isEnabled()) return true;
         
@@ -226,6 +286,12 @@ public class ParameterControl extends Composite {
             return value >= minValue && value <= maxValue;
         } catch (Exception e) {
             return false;
+        }
+    }
+    
+    public void setToolTipText(String tooltip) {
+        if (valueText != null) {
+            valueText.setToolTipText(tooltip);
         }
     }
 }

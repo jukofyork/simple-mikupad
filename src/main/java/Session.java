@@ -24,9 +24,6 @@ public class Session {
     // Sampling Parameters
     private SamplingParameters samplingParams;
     
-    // Advanced Settings
-    private AdvancedSettings advancedSettings;
-    
     /**
      * Creates a new session with default values
      */
@@ -44,9 +41,6 @@ public class Session {
         
         // Default sampling parameters
         this.samplingParams = new SamplingParameters();
-        
-        // Default advanced settings
-        this.advancedSettings = new AdvancedSettings();
     }
     
     /**
@@ -71,7 +65,6 @@ public class Session {
         this.apiKey = other.apiKey;
         this.model = other.model;
         this.samplingParams = new SamplingParameters(other.samplingParams);
-        this.advancedSettings = new AdvancedSettings(other.advancedSettings);
     }
     
     /**
@@ -98,9 +91,6 @@ public class Session {
         
         // Save sampling parameters
         json.add("samplingParams", samplingParams.toSessionJson());
-        
-        // Save advanced settings
-        json.add("advancedSettings", advancedSettings.toJson());
         
         return json;
     }
@@ -133,13 +123,6 @@ public class Session {
             if (json.has("maxTokens")) {
                 session.samplingParams.setMaxTokens(json.get("maxTokens").getAsInt());
             }
-        }
-        
-        // Load advanced settings
-        if (json.has("advancedSettings")) {
-            session.advancedSettings = AdvancedSettings.fromJson(json.getAsJsonObject("advancedSettings"));
-        } else {
-            session.advancedSettings = new AdvancedSettings();
         }
         
         return session;
@@ -184,12 +167,6 @@ public class Session {
     public SamplingParameters getSamplingParams() { return samplingParams; }
     public void setSamplingParams(SamplingParameters samplingParams) { 
         this.samplingParams = samplingParams; 
-        touch();
-    }
-    
-    public AdvancedSettings getAdvancedSettings() { return advancedSettings; }
-    public void setAdvancedSettings(AdvancedSettings advancedSettings) { 
-        this.advancedSettings = advancedSettings; 
         touch();
     }
     

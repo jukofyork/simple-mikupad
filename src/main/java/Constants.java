@@ -10,7 +10,7 @@ public class Constants {
     // Basic parameter defaults
     public static final int DEFAULT_SEED = -1;
     public static final double DEFAULT_TEMPERATURE = 0.8;
-    public static final int DEFAULT_MAX_TOKENS = 1;
+    public static final int DEFAULT_MAX_TOKENS = -1;
     public static final double DEFAULT_TOP_P = 0.9;
     public static final int DEFAULT_TOP_K = 40;
     public static final double DEFAULT_MIN_P = 0.1;
@@ -47,7 +47,8 @@ public class Constants {
     public static final int DEFAULT_DRY_PENALTY_LAST_N = -1;
     
     // Sampler ordering default
-    public static final String DEFAULT_SAMPLERS = "dry top_k typ_p top_p min_p xtc temperature";
+    // NOTE: This is the default order used by llama.cpp when samplers array is not passed
+    public static final String[] DEFAULT_SAMPLERS = {"dry", "top_k", "typ_p", "top_p", "min_p", "xtc", "temperature"};
     
     // Parameter ranges
     public static final double TEMPERATURE_MIN = 0.0;
@@ -56,8 +57,8 @@ public class Constants {
     public static final int TOP_K_MAX = 200;
     public static final double TOP_P_MIN = 0.0;
     public static final double TOP_P_MAX = 1.0;
-    public static final int MAX_TOKENS_MIN = 1;
-    public static final int MAX_TOKENS_MAX = 8192;
+    public static final int MAX_TOKENS_MIN = -1;
+    public static final int MAX_TOKENS_MAX = Integer.MAX_VALUE;
     public static final int SEED_MIN = -1;
     public static final int SEED_MAX = Integer.MAX_VALUE;
     public static final double MIN_P_MIN = 0.0;
@@ -70,9 +71,9 @@ public class Constants {
     public static final double REPEAT_PENALTY_MAX = 2.0;
     public static final int REPEAT_LAST_N_MIN = -1;
     public static final int REPEAT_LAST_N_MAX = 2048;
-    public static final double PRESENCE_PENALTY_MIN = -2.0;
+    public static final double PRESENCE_PENALTY_MIN = 0.0;
     public static final double PRESENCE_PENALTY_MAX = 2.0;
-    public static final double FREQUENCY_PENALTY_MIN = -2.0;
+    public static final double FREQUENCY_PENALTY_MIN = 0.0;
     public static final double FREQUENCY_PENALTY_MAX = 2.0;
     public static final double MIROSTAT_TAU_MIN = 0.1;
     public static final double MIROSTAT_TAU_MAX = 10.0;
@@ -96,10 +97,12 @@ public class Constants {
     public static final int DRY_PENALTY_LAST_N_MAX = 4096;
     
     // Default enabled states
-    public static final boolean DEFAULT_TEMPERATURE_ENABLED = true;
-    public static final boolean DEFAULT_TOP_P_ENABLED = true;
-    public static final boolean DEFAULT_TOP_K_ENABLED = true;
-    public static final boolean DEFAULT_MIN_P_ENABLED = true;
+    public static final boolean DEFAULT_SEED_ENABLED = false;
+    public static final boolean DEFAULT_SAMPLERS_ENABLED = false;
+    public static final boolean DEFAULT_TEMPERATURE_ENABLED = false;
+    public static final boolean DEFAULT_TOP_P_ENABLED = false;
+    public static final boolean DEFAULT_TOP_K_ENABLED = false;
+    public static final boolean DEFAULT_MIN_P_ENABLED = false;
     public static final boolean DEFAULT_TYPICAL_P_ENABLED = false;
     public static final boolean DEFAULT_TFS_Z_ENABLED = false;
     public static final boolean DEFAULT_REPEAT_PENALTY_ENABLED = false;
@@ -115,7 +118,7 @@ public class Constants {
     // Advanced settings defaults
     public static final String DEFAULT_GRAMMAR = "";
     public static final String DEFAULT_JSON_SCHEMA = "";
-    public static final String DEFAULT_LOGIT_BIAS = "[]";
+    public static final String DEFAULT_LOGIT_BIAS = "";
     public static final String DEFAULT_STOPPING_STRINGS = "";
     public static final String DEFAULT_BANNED_TOKENS = "";
     public static final boolean DEFAULT_IGNORE_EOS = false;
@@ -160,10 +163,7 @@ public class Constants {
     
     // API constants
     public static final int DEFAULT_TOKEN_ALTERNATIVES_COUNT = 10;
-    
-    // Valid sampler names
-    public static final Set<String> VALID_SAMPLERS = new HashSet<>(Arrays.asList("dry", "top_k", "typ_p", "top_p", "min_p", "xtc", "temperature"));
-    
+        
     /**
      * Parses a space-delimited string into an array of trimmed, non-empty strings.
      * @param input The space-delimited string
@@ -203,25 +203,6 @@ public class Constants {
         return input.replace("\\n", "\n")
                    .replace("\\t", "\t")
                    .replace("\\r", "\r");
-    }
-    
-    /**
-     * Validates that all samplers in the input string are valid.
-     * @param samplers Space-delimited sampler string
-     * @return true if all samplers are valid, false otherwise
-     */
-    public static boolean validateSamplers(String samplers) {
-        if (samplers == null || samplers.trim().isEmpty()) {
-            return true; // Empty is valid
-        }
-        
-        String[] samplerArray = parseSpaceDelimited(samplers);
-        for (String sampler : samplerArray) {
-            if (!VALID_SAMPLERS.contains(sampler)) {
-                return false;
-            }
-        }
-        return true;
     }
     
     // Text area height hints for advanced settings dialog

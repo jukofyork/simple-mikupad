@@ -81,14 +81,6 @@ public class SessionUIManager {
             }
         });
         
-        // Advanced settings button
-        app.getAdvancedSettingsButton().addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                openAdvancedSettingsDialog();
-            }
-        });
-        
         // Auto-save listeners for text fields
         ModifyListener autoSaveListener = new ModifyListener() {
             @Override
@@ -147,7 +139,6 @@ public class SessionUIManager {
             app.getPromptText().setText(session.getPromptText());
             
             updateSamplingParamsLabel();
-            updateAdvancedSettingsLabel();
             app.getTokenManager().clearTokenColoring();
             app.updateStatus("Loaded session: " + session.getName());
         } finally {
@@ -308,19 +299,6 @@ public class SessionUIManager {
         }
     }
     
-    private void openAdvancedSettingsDialog() {
-        Session currentSession = app.getSessionManager().getCurrentSession();
-        if (currentSession != null) {
-            AdvancedSettingsDialog dialog = new AdvancedSettingsDialog(app.getShell(), currentSession.getAdvancedSettings());
-            if (dialog.open()) {
-                currentSession.setAdvancedSettings(dialog.getSettings());
-                updateAdvancedSettingsLabel();
-                autoSaveSessionState();
-                app.updateStatus("Advanced settings updated");
-            }
-        }
-    }
-    
     private void updateSamplingParamsLabel() {
         Session currentSession = app.getSessionManager().getCurrentSession();
         if (currentSession != null && app.getSamplingParamsLabel() != null) {
@@ -328,14 +306,6 @@ public class SessionUIManager {
             String summary = String.format("Temp: %.2f, Top-K: %d, Top-P: %.2f, Min-P: %.2f", 
                 params.getTemperature(), params.getTopK(), params.getTopP(), params.getMinP());
             app.getSamplingParamsLabel().setText(summary);
-        }
-    }
-    
-    private void updateAdvancedSettingsLabel() {
-        Session currentSession = app.getSessionManager().getCurrentSession();
-        if (currentSession != null && app.getAdvancedSettingsLabel() != null) {
-            AdvancedSettings settings = currentSession.getAdvancedSettings();
-            app.getAdvancedSettingsLabel().setText(settings.getSummary());
         }
     }
     

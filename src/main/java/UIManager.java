@@ -98,7 +98,7 @@ public class UIManager {
     
     private void createSamplingGroup() {
         Group samplingGroup = new Group(app.getShell(), SWT.NONE);
-        samplingGroup.setText("Generation Parameters");
+        samplingGroup.setText("Sampling Parameters");
         samplingGroup.setLayout(new GridLayout(1, false));
         samplingGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
         
@@ -113,18 +113,6 @@ public class UIManager {
         Label samplingParamsLabel = new Label(samplingComp, SWT.NONE);
         samplingParamsLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         app.setSamplingParamsLabel(samplingParamsLabel);
-        
-        Composite advancedComp = new Composite(samplingGroup, SWT.NONE);
-        advancedComp.setLayout(new GridLayout(2, false));
-        advancedComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-        
-        Button advancedSettingsButton = new Button(advancedComp, SWT.PUSH);
-        advancedSettingsButton.setText("Configure...");
-        app.setAdvancedSettingsButton(advancedSettingsButton);
-        
-        Label advancedSettingsLabel = new Label(advancedComp, SWT.NONE);
-        advancedSettingsLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-        app.setAdvancedSettingsLabel(advancedSettingsLabel);
     }
     
     private void createFontGroup() {

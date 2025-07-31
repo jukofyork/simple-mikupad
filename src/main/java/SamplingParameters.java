@@ -1,8 +1,8 @@
 import com.google.gson.JsonObject;
 
 /**
- * Comprehensive sampling parameters for text generation.
- * Includes all major sampling methods and their configurations.
+ * Comprehensive parameters for text generation including sampling parameters,
+ * advanced constraints, and generation settings.
  */
 public class SamplingParameters {
     
@@ -45,14 +45,22 @@ public class SamplingParameters {
     private double dryBase = Constants.DEFAULT_DRY_BASE;
     private int dryAllowedLength = Constants.DEFAULT_DRY_ALLOWED_LENGTH;
     private String drySequenceBreakers = Constants.DEFAULT_DRY_SEQUENCE_BREAKERS;
-    
-    // Additional DRY and control parameters
     private int dryPenaltyLastN = Constants.DEFAULT_DRY_PENALTY_LAST_N;
     
     // Sampler ordering
-    private String samplers = Constants.DEFAULT_SAMPLERS;
+    private String samplers = String.join(",", Constants.DEFAULT_SAMPLERS);
+    
+    // Advanced generation constraints
+    private String grammar = Constants.DEFAULT_GRAMMAR;
+    private String jsonSchema = Constants.DEFAULT_JSON_SCHEMA;
+    private String logitBias = Constants.DEFAULT_LOGIT_BIAS;
+    private String stoppingStrings = Constants.DEFAULT_STOPPING_STRINGS;
+    private String bannedTokens = Constants.DEFAULT_BANNED_TOKENS;
+    private boolean ignoreEos = Constants.DEFAULT_IGNORE_EOS;
     
     // Sampler toggles - which samplers are enabled
+    private boolean seedEnabled = Constants.DEFAULT_SEED_ENABLED;
+    private boolean samplersEnabled = Constants.DEFAULT_SAMPLERS_ENABLED;
     private boolean temperatureEnabled = Constants.DEFAULT_TEMPERATURE_ENABLED;
     private boolean topPEnabled = Constants.DEFAULT_TOP_P_ENABLED;
     private boolean topKEnabled = Constants.DEFAULT_TOP_K_ENABLED;
@@ -104,7 +112,17 @@ public class SamplingParameters {
         this.dryPenaltyLastN = other.dryPenaltyLastN;
         this.samplers = other.samplers;
         
+        // Copy advanced constraints
+        this.grammar = other.grammar;
+        this.jsonSchema = other.jsonSchema;
+        this.logitBias = other.logitBias;
+        this.stoppingStrings = other.stoppingStrings;
+        this.bannedTokens = other.bannedTokens;
+        this.ignoreEos = other.ignoreEos;
+        
         // Copy enabled flags
+        this.seedEnabled = other.seedEnabled;
+        this.samplersEnabled = other.samplersEnabled;
         this.temperatureEnabled = other.temperatureEnabled;
         this.topPEnabled = other.topPEnabled;
         this.topKEnabled = other.topKEnabled;
@@ -123,9 +141,9 @@ public class SamplingParameters {
     }
     
     /**
-     * Converts to JSON for API requests (sampling parameters only)
+     * Converts to JSON for API requests
      */
-    public JsonObject toJson(AdvancedSettings advancedSettings) {
+    public JsonObject toJson() {
         JsonObject json = new JsonObject();
         
         // Add max_tokens only if enabled
@@ -133,11 +151,13 @@ public class SamplingParameters {
             json.addProperty("max_tokens", maxTokens);
         }
         
-        // Add seed (always include, -1 means random)
-        json.addProperty("seed", seed);
+        // Add seed only if enabled (always include, -1 means random)
+        if (seedEnabled) {
+            json.addProperty("seed", seed);
+        }
         
         // Add ignore_eos
-        if (advancedSettings != null && advancedSettings.isIgnoreEos()) {
+        if (ignoreEos) {
             json.addProperty("ignore_eos", true);
         }
         
@@ -218,13 +238,13 @@ public class SamplingParameters {
             }
         }
         
-        // Add samplers array (space-delimited)
-        if (!samplers.trim().isEmpty()) {
-            String[] samplerArray = Constants.parseSpaceDelimited(samplers);
+        // Add samplers array (comma-delimited) only if enabled
+        if (samplersEnabled && !samplers.trim().isEmpty()) {
+            String[] samplerArray = samplers.split(",");
             
             com.google.gson.JsonArray samplersJsonArray = new com.google.gson.JsonArray();
             for (String sampler : samplerArray) {
-                samplersJsonArray.add(sampler);
+                samplersJsonArray.add(sampler.trim());
             }
             
             if (samplersJsonArray.size() > 0) {
@@ -233,18 +253,18 @@ public class SamplingParameters {
         }
         
         // Advanced features
-        if (advancedSettings != null && !advancedSettings.getGrammar().trim().isEmpty()) {
-            json.addProperty("grammar", Constants.processEscapeSequences(advancedSettings.getGrammar().trim()));
+        if (!grammar.trim().isEmpty()) {
+            json.addProperty("grammar", Constants.processEscapeSequences(grammar.trim()));
         }
         
-        if (advancedSettings != null && !advancedSettings.getJsonSchema().trim().isEmpty()) {
-            json.addProperty("json_schema", advancedSettings.getJsonSchema().trim());
+        if (!jsonSchema.trim().isEmpty()) {
+            json.addProperty("json_schema", jsonSchema.trim());
         }
         
-        if (advancedSettings != null && !advancedSettings.getLogitBias().trim().isEmpty()) {
+        if (!logitBias.trim().isEmpty()) {
             try {
                 // Parse logit bias as JSON array
-                com.google.gson.JsonElement biasElement = com.google.gson.JsonParser.parseString(advancedSettings.getLogitBias());
+                com.google.gson.JsonElement biasElement = com.google.gson.JsonParser.parseString(logitBias);
                 if (biasElement.isJsonArray()) {
                     json.add("logit_bias", biasElement.getAsJsonArray());
                 }
@@ -255,9 +275,9 @@ public class SamplingParameters {
         }
         
         // Handle banned tokens by converting to logit bias
-        if (advancedSettings != null && !advancedSettings.getBannedTokens().trim().isEmpty()) {
+        if (!bannedTokens.trim().isEmpty()) {
             try {
-                String[] tokens = advancedSettings.getBannedTokens().split(",");
+                String[] tokens = bannedTokens.split(",");
                 com.google.gson.JsonArray biasArray = new com.google.gson.JsonArray();
                 for (String token : tokens) {
                     String trimmed = token.trim();
@@ -276,9 +296,9 @@ public class SamplingParameters {
             }
         }
         
-        if (advancedSettings != null && !advancedSettings.getStoppingStrings().trim().isEmpty()) {
+        if (!stoppingStrings.trim().isEmpty()) {
             // Parse stopping strings (comma-separated)
-            String[] stops = advancedSettings.getStoppingStrings().split(",");
+            String[] stops = stoppingStrings.split(",");
             if (stops.length > 0) {
                 com.google.gson.JsonArray stopArray = new com.google.gson.JsonArray();
                 for (String stop : stops) {
@@ -329,7 +349,17 @@ public class SamplingParameters {
         if (json.has("dryPenaltyLastN")) params.dryPenaltyLastN = json.get("dryPenaltyLastN").getAsInt();
         if (json.has("samplers")) params.samplers = json.get("samplers").getAsString();
         
+        // Load advanced constraints
+        if (json.has("grammar")) params.grammar = json.get("grammar").getAsString();
+        if (json.has("jsonSchema")) params.jsonSchema = json.get("jsonSchema").getAsString();
+        if (json.has("logitBias")) params.logitBias = json.get("logitBias").getAsString();
+        if (json.has("stoppingStrings")) params.stoppingStrings = json.get("stoppingStrings").getAsString();
+        if (json.has("bannedTokens")) params.bannedTokens = json.get("bannedTokens").getAsString();
+        if (json.has("ignoreEos")) params.ignoreEos = json.get("ignoreEos").getAsBoolean();
+        
         // Load enabled flags
+        if (json.has("seedEnabled")) params.seedEnabled = json.get("seedEnabled").getAsBoolean();
+        if (json.has("samplersEnabled")) params.samplersEnabled = json.get("samplersEnabled").getAsBoolean();
         if (json.has("temperatureEnabled")) params.temperatureEnabled = json.get("temperatureEnabled").getAsBoolean();
         if (json.has("topPEnabled")) params.topPEnabled = json.get("topPEnabled").getAsBoolean();
         if (json.has("topKEnabled")) params.topKEnabled = json.get("topKEnabled").getAsBoolean();
@@ -383,7 +413,17 @@ public class SamplingParameters {
         json.addProperty("dryPenaltyLastN", dryPenaltyLastN);
         json.addProperty("samplers", samplers);
         
+        // Save advanced constraints
+        json.addProperty("grammar", grammar);
+        json.addProperty("jsonSchema", jsonSchema);
+        json.addProperty("logitBias", logitBias);
+        json.addProperty("stoppingStrings", stoppingStrings);
+        json.addProperty("bannedTokens", bannedTokens);
+        json.addProperty("ignoreEos", ignoreEos);
+        
         // Save enabled flags
+        json.addProperty("seedEnabled", seedEnabled);
+        json.addProperty("samplersEnabled", samplersEnabled);
         json.addProperty("temperatureEnabled", temperatureEnabled);
         json.addProperty("topPEnabled", topPEnabled);
         json.addProperty("topKEnabled", topKEnabled);
@@ -403,7 +443,54 @@ public class SamplingParameters {
         return json;
     }
     
-    // Getters and setters for all parameters
+    /**
+     * Returns a summary string for display in UI
+     */
+    public String getSummary() {
+        java.util.List<String> parts = new java.util.ArrayList<>();
+        
+        if (!grammar.trim().isEmpty()) {
+            parts.add("Grammar");
+        }
+        
+        if (!jsonSchema.trim().isEmpty()) {
+            parts.add("JSON Schema");
+        }
+        
+        if (!logitBias.trim().isEmpty()) {
+            parts.add("Logit Bias");
+        }
+        
+        if (!stoppingStrings.trim().isEmpty()) {
+            String[] stops = stoppingStrings.split(",");
+            int count = 0;
+            for (String stop : stops) {
+                if (!stop.trim().isEmpty()) count++;
+            }
+            if (count > 0) {
+                parts.add(count + " stop string" + (count == 1 ? "" : "s"));
+            }
+        }
+        
+        if (!bannedTokens.trim().isEmpty()) {
+            String[] tokens = bannedTokens.split(",");
+            int count = 0;
+            for (String token : tokens) {
+                if (!token.trim().isEmpty()) count++;
+            }
+            if (count > 0) {
+                parts.add(count + " banned token" + (count == 1 ? "" : "s"));
+            }
+        }
+        
+        if (parts.isEmpty()) {
+            return "Default settings";
+        }
+        
+        return String.join(", ", parts);
+    }
+    
+    // Getters and setters for all parameters (existing ones remain the same)
     public int getSeed() { return seed; }
     public void setSeed(int seed) { this.seed = seed; }
     
@@ -482,7 +569,32 @@ public class SamplingParameters {
     public String getSamplers() { return samplers; }
     public void setSamplers(String samplers) { this.samplers = samplers; }
     
+    // Advanced constraints getters and setters
+    public String getGrammar() { return grammar; }
+    public void setGrammar(String grammar) { this.grammar = grammar; }
+    
+    public String getJsonSchema() { return jsonSchema; }
+    public void setJsonSchema(String jsonSchema) { this.jsonSchema = jsonSchema; }
+    
+    public String getLogitBias() { return logitBias; }
+    public void setLogitBias(String logitBias) { this.logitBias = logitBias; }
+    
+    public String getStoppingStrings() { return stoppingStrings; }
+    public void setStoppingStrings(String stoppingStrings) { this.stoppingStrings = stoppingStrings; }
+    
+    public String getBannedTokens() { return bannedTokens; }
+    public void setBannedTokens(String bannedTokens) { this.bannedTokens = bannedTokens; }
+    
+    public boolean isIgnoreEos() { return ignoreEos; }
+    public void setIgnoreEos(boolean ignoreEos) { this.ignoreEos = ignoreEos; }
+    
     // Enabled flag getters and setters
+    public boolean isSeedEnabled() { return seedEnabled; }
+    public void setSeedEnabled(boolean enabled) { this.seedEnabled = enabled; }
+    
+    public boolean isSamplersEnabled() { return samplersEnabled; }
+    public void setSamplersEnabled(boolean enabled) { this.samplersEnabled = enabled; }
+    
     public boolean isTemperatureEnabled() { return temperatureEnabled; }
     public void setTemperatureEnabled(boolean enabled) { this.temperatureEnabled = enabled; }
     

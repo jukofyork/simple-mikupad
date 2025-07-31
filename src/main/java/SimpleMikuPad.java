@@ -29,8 +29,6 @@ public class SimpleMikuPad {
     private Text modelText;
     private Button samplingParamsButton;
     private Label samplingParamsLabel;
-    private Button advancedSettingsButton;
-    private Label advancedSettingsLabel;
     private Button generateButton;
     private Button cancelButton;
     private Label statusLabel;
@@ -149,8 +147,6 @@ public class SimpleMikuPad {
     public Text getModelText() { return modelText; }
     public Button getSamplingParamsButton() { return samplingParamsButton; }
     public Label getSamplingParamsLabel() { return samplingParamsLabel; }
-    public Button getAdvancedSettingsButton() { return advancedSettingsButton; }
-    public Label getAdvancedSettingsLabel() { return advancedSettingsLabel; }
     public Button getGenerateButton() { return generateButton; }
     public Button getCancelButton() { return cancelButton; }
     public Label getStatusLabel() { return statusLabel; }
@@ -178,8 +174,6 @@ public class SimpleMikuPad {
     public void setModelText(Text modelText) { this.modelText = modelText; }
     public void setSamplingParamsButton(Button samplingParamsButton) { this.samplingParamsButton = samplingParamsButton; }
     public void setSamplingParamsLabel(Label samplingParamsLabel) { this.samplingParamsLabel = samplingParamsLabel; }
-    public void setAdvancedSettingsButton(Button advancedSettingsButton) { this.advancedSettingsButton = advancedSettingsButton; }
-    public void setAdvancedSettingsLabel(Label advancedSettingsLabel) { this.advancedSettingsLabel = advancedSettingsLabel; }
     public void setGenerateButton(Button generateButton) { this.generateButton = generateButton; }
     public void setCancelButton(Button cancelButton) { this.cancelButton = cancelButton; }
     public void setStatusLabel(Label statusLabel) { this.statusLabel = statusLabel; }
