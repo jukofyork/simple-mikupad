@@ -46,47 +46,53 @@ public class LlamaCppGenerationManager extends BaseGenerationManager {
 			responseBody = responseBuilder.toString();
 		}
 	
-		JsonObject responseJson = JsonParser.parseString(responseBody).getAsJsonObject();
-		JsonArray tokenArray = responseJson.getAsJsonArray("tokens");
+	    JsonObject responseJson = JsonParser.parseString(responseBody).getAsJsonObject();
+	    JsonArray tokenArray = responseJson.getAsJsonArray("tokens");
 	
-		int textOffset = 0;
+	    String remainingText = prompt;
+	    int currentOffset = 0;
 	
-		for (int i = 0; i < tokenArray.size(); i++) {
-			JsonElement tokenEntry = tokenArray.get(i);
+	    for (int i = 0; i < tokenArray.size(); i++) {
+	        JsonElement tokenEntry = tokenArray.get(i);
 	
-			if (tokenEntry.isJsonObject()) {
-				JsonObject tokenMetadata = tokenEntry.getAsJsonObject();
+	        if (tokenEntry.isJsonObject()) {
+	            JsonObject tokenMetadata = tokenEntry.getAsJsonObject();
 	
-				if (tokenMetadata.has("piece")) {
-					String tokenText = "";
-					JsonElement tokenPart = tokenMetadata.get("piece");
-					if (tokenPart.isJsonArray()) {
-						JsonArray byteArray = tokenPart.getAsJsonArray();
-						StringBuilder tokenTextBuilder = new StringBuilder();
-						for (int j = 0; j < byteArray.size(); j++) {
-							tokenTextBuilder.append((char) byteArray.get(j).getAsInt());
-						}
-						tokenText = tokenTextBuilder.toString();
-					} else {
-						tokenText = tokenPart.getAsString();
-					}
-	
-					if (tokenText != null) {
-						final int startOffset = textOffset;
-						final int tokenLength = tokenText.length();
-						final int tokenIndex = i;
-						final String finalTokenText = tokenText;
-						app.getDisplay().asyncExec(() -> {
-						    if (!isCancelled) {
-						        app.getTokenManager().showPromptToken(startOffset, tokenLength, tokenIndex);
-						        app.getTokenManager().storeTokenInfo(startOffset, finalTokenText);
-						    }
-						});
-						textOffset += tokenText.length();
-					}
-				}
-			}
-		}
+	            if (tokenMetadata.has("piece")) {
+	                JsonElement tokenPart = tokenMetadata.get("piece");
+	                
+	                // Skip byte-array tokens (split Unicode characters)
+	                if (tokenPart.isJsonArray()) {
+	                    continue; // Skip this token entirely
+	                }
+	                
+	                // Only process string tokens
+	                String tokenText = tokenPart.getAsString();
+	                if (tokenText != null && !tokenText.isEmpty()) {
+	                    // Find this token in the remaining text
+	                    int tokenPosition = remainingText.indexOf(tokenText);
+	                    if (tokenPosition >= 0) {
+	                        final int startOffset = currentOffset + tokenPosition;
+	                        final int tokenLength = tokenText.length();
+	                        final int tokenIndex = i;
+	                        final String finalTokenText = tokenText;
+	                        
+	                        app.getDisplay().asyncExec(() -> {
+	                            if (!isCancelled) {
+	                                app.getTokenManager().showPromptToken(startOffset, tokenLength, tokenIndex);
+	                                app.getTokenManager().storeTokenInfo(startOffset, finalTokenText);
+	                            }
+	                        });
+	                        
+	                        // Update position for next search
+	                        int consumedLength = tokenPosition + tokenText.length();
+	                        currentOffset += consumedLength;
+	                        remainingText = remainingText.substring(consumedLength);
+	                    }
+	                }
+	            }
+	        }
+	    }
 	}
 
 	@Override
