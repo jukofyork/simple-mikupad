@@ -27,7 +27,6 @@ public class TextOperationsManager {
         
         // Template operations
         MenuItem wrapSystemItem = new MenuItem(contextMenu, SWT.PUSH);
-        wrapSystemItem.setText("Wrap as System");
         wrapSystemItem.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -36,7 +35,6 @@ public class TextOperationsManager {
         });
         
         MenuItem wrapInstructionItem = new MenuItem(contextMenu, SWT.PUSH);
-        wrapInstructionItem.setText("Wrap as Instruction");
         wrapInstructionItem.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -45,7 +43,6 @@ public class TextOperationsManager {
         });
         
         MenuItem addEosItem = new MenuItem(contextMenu, SWT.PUSH);
-        addEosItem.setText("Add EOS Token");
         addEosItem.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -119,6 +116,24 @@ public class TextOperationsManager {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 executeTextOperation("selectAll");
+            }
+        });
+        
+        // Update menu text based on selection when menu is shown
+        contextMenu.addListener(SWT.Show, new org.eclipse.swt.widgets.Listener() {
+            @Override
+            public void handleEvent(Event event) {
+                boolean hasSelection = app.getPromptText().getSelectionCount() > 0;
+                
+                if (hasSelection) {
+                    wrapSystemItem.setText("Wrap System Message");
+                    wrapInstructionItem.setText("Wrap User Prompt");
+                    addEosItem.setText("Replace with EOS");
+                } else {
+                    wrapSystemItem.setText("Insert System Message");
+                    wrapInstructionItem.setText("Insert User Prompt");
+                    addEosItem.setText("Insert EOS");
+                }
             }
         });
         
