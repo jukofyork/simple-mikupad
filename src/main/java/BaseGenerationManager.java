@@ -46,6 +46,9 @@ public abstract class BaseGenerationManager {
 		app.getCancelButton().setEnabled(true);
 		app.getTokenManager().clearTokenColoring();
 
+		// Begin compound change for entire generation
+		app.getUndoManager().beginCompoundChange();
+
 		String endpoint = app.getEndpointText().getText().trim();
 		String apiKey = app.getApiKeyText().getText().trim();
 		String model = app.getModelText().getText().trim();
@@ -95,12 +98,16 @@ public abstract class BaseGenerationManager {
 						SessionUIManager sessionUI = new SessionUIManager(app);
 						sessionUI.saveCurrentSessionState();
 					}
+					// End compound change when generation completes
+					app.getUndoManager().endCompoundChange();
 					resetButtons();
 				});
 
 			} catch (Exception ex) {
 				app.getDisplay().asyncExec(() -> {
 					app.updateStatus("Error: " + ex.getMessage());
+					// End compound change on error
+					app.getUndoManager().endCompoundChange();
 					resetButtons();
 				});
 			}
@@ -110,6 +117,8 @@ public abstract class BaseGenerationManager {
 	public void cancelGeneration() {
 		isCancelled = true;
 		app.updateStatus("Cancelled");
+		// End compound change on cancellation
+		app.getUndoManager().endCompoundChange();
 		resetButtons();
 	}
 

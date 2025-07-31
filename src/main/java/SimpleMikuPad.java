@@ -18,6 +18,7 @@ public class SimpleMikuPad {
     private BaseGenerationManager generationManager;
     private TextOperationsManager textOperationsManager;
     
+    private StyledTextUndoManager undoManager;
     private SessionManager sessionManager;
     private HttpClientWrapper httpClient;
     
@@ -106,6 +107,10 @@ public class SimpleMikuPad {
         uiManager.createUI();
         sessionUIManager.setupSessionUI();
         initializeManagers();
+        loadCurrentSession();
+        
+        // Initialize undo manager AFTER session is loaded
+        initializeUndoManager();
         
         // Setup event listeners after all managers and UI are created
         tokenManager.setupEventListeners();
@@ -121,6 +126,9 @@ public class SimpleMikuPad {
         if (tokenManager != null) {
             tokenManager.dispose();
         }
+        if (undoManager != null) {
+            undoManager.dispose();
+        }
         sessionUIManager.saveCurrentSessionState();
         display.dispose();
     }
@@ -131,6 +139,7 @@ public class SimpleMikuPad {
     public SessionManager getSessionManager() { return sessionManager; }
     public HttpClientWrapper getHttpClient() { return httpClient; }
     public TokenManager getTokenManager() { return tokenManager; }
+    public StyledTextUndoManager getUndoManager() { return undoManager; }
     public BaseGenerationManager getGenerationManager() { return generationManager; }
     
     // UI Component getters
@@ -160,6 +169,10 @@ public class SimpleMikuPad {
     
     // UI Component setters
     public void setPromptText(StyledText promptText) { this.promptText = promptText; }
+    public void initializeUndoManager() {
+        undoManager = new StyledTextUndoManager(promptText, 50);
+    }
+    
     public void setEndpointText(Text endpointText) { this.endpointText = endpointText; }
     public void setApiKeyText(Text apiKeyText) { this.apiKeyText = apiKeyText; }
     public void setModelText(Text modelText) { this.modelText = modelText; }

@@ -184,6 +184,7 @@ public class SessionUIManager {
             if (selectedIndex < sessions.size()) {
                 Session selectedSession = sessions.get(selectedIndex);
                 app.getSessionManager().setCurrentSession(selectedSession.getId());
+                resetUndoHistory();
                 loadSessionIntoUI(selectedSession);
             }
         }
@@ -195,6 +196,7 @@ public class SessionUIManager {
             saveCurrentSessionState();
             Session newSession = app.getSessionManager().createSession(name);
             app.getSessionManager().setCurrentSession(newSession.getId());
+            resetUndoHistory();
             refreshSessionCombo();
             loadSessionIntoUI(newSession);
         }
@@ -209,6 +211,7 @@ public class SessionUIManager {
             
             if (messageBox.open() == SWT.YES) {
                 if (app.getSessionManager().deleteSession(currentSession.getId())) {
+                    resetUndoHistory();
                     refreshSessionCombo();
                     loadSessionIntoUI(app.getSessionManager().getCurrentSession());
                     app.updateStatus("Deleted session: " + currentSession.getName());
@@ -236,6 +239,7 @@ public class SessionUIManager {
             Session clonedSession = app.getSessionManager().cloneSession(currentSession.getId());
             if (clonedSession != null) {
                 app.getSessionManager().setCurrentSession(clonedSession.getId());
+                resetUndoHistory();
                 refreshSessionCombo();
                 loadSessionIntoUI(clonedSession);
                 app.updateStatus("Cloned session: " + clonedSession.getName());
@@ -278,6 +282,7 @@ public class SessionUIManager {
             try {
                 Session importedSession = app.getSessionManager().importSession(new java.io.File(filename));
                 app.getSessionManager().setCurrentSession(importedSession.getId());
+                resetUndoHistory();
                 refreshSessionCombo();
                 loadSessionIntoUI(importedSession);
                 app.updateStatus("Imported session: " + importedSession.getName());
@@ -332,6 +337,13 @@ public class SessionUIManager {
             AdvancedSettings settings = currentSession.getAdvancedSettings();
             app.getAdvancedSettingsLabel().setText(settings.getSummary());
         }
+    }
+    
+    /**
+     * Resets the undo history - called when switching session contexts
+     */
+    private void resetUndoHistory() {
+        app.getUndoManager().reset();
     }
     
     private String promptForSessionName(String defaultName) {

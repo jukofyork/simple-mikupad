@@ -1,6 +1,8 @@
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Font;
@@ -19,7 +21,31 @@ public class TextOperationsManager {
     
     public void initializeContextMenu() {
         setupFontControls();
+        setupKeyListener();
         Menu contextMenu = new Menu(app.getPromptText());
+        
+        // Undo
+        MenuItem undoItem = new MenuItem(contextMenu, SWT.PUSH);
+        undoItem.setText("Undo");
+        undoItem.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                executeTextOperation("undo");
+            }
+        });
+        
+        // Redo
+        MenuItem redoItem = new MenuItem(contextMenu, SWT.PUSH);
+        redoItem.setText("Redo");
+        redoItem.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                executeTextOperation("redo");
+            }
+        });
+        
+        // Separator
+        new MenuItem(contextMenu, SWT.SEPARATOR);
         
         // Cut
         MenuItem cutItem = new MenuItem(contextMenu, SWT.PUSH);
@@ -65,6 +91,25 @@ public class TextOperationsManager {
         });
         
         app.getPromptText().setMenu(contextMenu);
+    }
+    
+    private void setupKeyListener() {
+        app.getPromptText().addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.keyCode == 'z' || e.keyCode == 'Z') {
+                    if ((e.stateMask & SWT.MODIFIER_MASK) == SWT.MOD1) {
+                        // Ctrl+Z for undo
+                        executeTextOperation("undo");
+                        e.doit = false;
+                    } else if ((e.stateMask & SWT.MODIFIER_MASK) == (SWT.MOD1 | SWT.MOD2)) {
+                        // Ctrl+Shift+Z for redo
+                        executeTextOperation("redo");
+                        e.doit = false;
+                    }
+                }
+            }
+        });
     }
     
     private void setupFontControls() {
@@ -119,6 +164,16 @@ public class TextOperationsManager {
         if (app.getPromptText().isDisposed()) return;
         
         switch (operationType) {
+            case "undo":
+                if (app.getUndoManager() != null && app.getUndoManager().canUndo()) {
+                    app.getUndoManager().undo();
+                }
+                break;
+            case "redo":
+                if (app.getUndoManager() != null && app.getUndoManager().canRedo()) {
+                    app.getUndoManager().redo();
+                }
+                break;
             case "cut":
                 app.getPromptText().cut();
                 break;
