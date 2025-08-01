@@ -134,10 +134,14 @@ public class Constants {
     public static final String DEFAULT_ENDPOINT = "http://127.0.0.1:8080";
     public static final String DEFAULT_MODEL = "Qwen3-30B-A3B";
     public static final String SESSION_DISPLAY_DATE_FORMAT = "dd MMM yyyy HH:mm";
-    public static final String MIKUPAD_DIR_NAME = ".mikupad";
+    public static final String MIKUPAD_DIR_NAME = ".simple-mikupad";
     public static final String SESSIONS_FILE_NAME = "sessions.json";
     public static final String DEFAULT_SESSION_NAME = "Default Session";
-    public static final String DEFAULT_SESSION_PROMPT = "<|im_start|>user\nWrite me story about pigs<|im_end|>\n<|im_start|>assistant\n\n<think>\n\n</think>\n\n";
+    public static final String DEFAULT_SESSION_PROMPT = "<|im_start|>system\n"
+    		+ "You are a talented writing assistant.<|im_end|>\n"
+    		+ "<|im_start|>user\n"
+    		+ "Write a story about Hatsune Miku and Kagamine Rin.<|im_end|>\n"
+    		+ "<|im_start|>assistant\n";
     
     // Prompt coloring constants
     public static final int COLOR_BLUE_DARK = 120;
@@ -168,19 +172,127 @@ public class Constants {
     
     // Template definitions
     public static final String[][] INSTRUCTION_TEMPLATES = {
-        {"ChatML", "<|im_start|>system\\n", "<|im_end|>\\n", "<|im_start|>user\\n", "<|im_end|>\\n<|im_start|>assistant\\n", "<|im_end|>"},   
-        {"Alpaca", "### System:\\n", "\\n\\n", "### Instruction:\\n", "\\n\\n### Response:", "\\n\\n"},   
-        {"Mistral", "<<SYS>>\\n", "<</SYS>>\\n\\n", "[INST]", "[/INST]", "</s>"},
-        {"Llama 3", "<|start_header_id|>system<|end_header_id|>\\n\\n", "<|eot_id|>", "<|start_header_id|>user<|end_header_id|>\\n\\n", "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\\n\\n", "<|eot_id|>"},
-        {"Phi 2", "", "", "\\nInstruct: ", "\\nOutput: ", ""},
-        {"Phi 3", "<|system|>\\n", "<|end|>\\n", "<|user|>\\n", "<|end|>\\n<|assistant|>\\n", "<|end|>"},
-        {"Command-R", "<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>", "<|END_OF_TURN_TOKEN|>", "<|START_OF_TURN_TOKEN|><|USER_TOKEN|>", "<|END_OF_TURN_TOKEN|><|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|>", "<|END_OF_TURN_TOKEN|>"},
-        {"Metharme", "<|system|>", "", "<|user|>", "<|model|>", ""},
-        {"Vicuna", "", "\\n\\n", "USER: ", "\\nASSISTANT: ", "</s>"},
-        {"Gemma", "<start_of_turn>system\\n", "<end_of_turn>\\n", "<start_of_turn>user\\n", "<end_of_turn>\\n<start_of_turn>model\\n", "<end_of_turn>"},
-        {"R1", "", "", "<｜User｜>", "<｜Assistant｜><think>\\n", ""}
+    		{"Alpaca",
+    			"### System:\\n",
+    			"\\n\\n",
+    			"### Instruction:\\n",
+    			"\\n\\n### Response:",
+    			"\\n\\n"
+    		},
+    		{"ChatML",
+    			"<|im_start|>system\\n",
+    			"<|im_end|>\\n",
+    			"<|im_start|>user\\n",
+    			"<|im_end|>\\n<|im_start|>assistant\\n",
+    			"<|im_end|>"
+    		},
+    		{"Cohere",
+    			"<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>",
+    			"<|END_OF_TURN_TOKEN|>",
+    			"<|START_OF_TURN_TOKEN|><|USER_TOKEN|>",
+    			"<|END_OF_TURN_TOKEN|><|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|>",
+    			"<|END_OF_TURN_TOKEN|>"
+    		},
+    		{"Deepseek",
+    			"",
+    			"\\n\\n",
+    			"<｜User｜>",
+    			"<｜Assistant｜>",
+    			"<｜end▁of▁sentence｜>"
+    		},
+    		{"Gemma",
+    			"<start_of_turn>system\\n",
+    			"<end_of_turn>\\n",
+    			"<start_of_turn>user\\n",
+    			"<end_of_turn>\\n<start_of_turn>model\\n",
+    			"<end_of_turn>"
+    		},
+    		{"GLM 4",
+    			"[gMASK]<sop><|system|>\\n",
+    			"",
+    			"<|user|>\\n",
+    			"<|assistant|>\\n",
+    			"<|endoftext|>"
+    		},
+    		{"Kimi K2",
+    			"<|im_system|>system<|im_middle|>",
+    			"<|im_end|>",
+    			"<|im_user|>user<|im_middle|>",
+    			"<|im_end|><|im_assistant|>assistant<|im_middle|>",
+    			"<|im_end|>"
+    		},
+    		{"Llama 2",
+    			"[INST] <<SYS>>\\n",
+    			"<</SYS>>\\n\\n{{FIRST MESSAGE HERE}} [/INST] ",
+    			"<s>[INST] ",
+    			" [/INST]",
+    			"</s>"
+    		},
+    		{"Llama 3",
+    			"<|start_header_id|>system<|end_header_id|>\\n\\n",
+    			"<|eot_id|>",
+    			"<|start_header_id|>user<|end_header_id|>\\n\\n",
+    			"<|eot_id|><|start_header_id|>assistant<|end_header_id|>\\n\\n",
+    			"<|eot_id|>"
+    		},
+    		{"Mistral",
+    			"[INST] ",
+    			"\\n{{FIRST MESSAGE HERE}} [/INST]",
+    			"[INST] ",
+    			" [/INST]",
+    			"</s>"
+    		},
+    		{"Mistral V1",
+    			" [INST] ",
+    			"\\n\\n{{FIRST MESSAGE HERE}} [/INST] ",
+    			" [INST] ",
+    			" [/INST] ",
+    			"</s>"
+    		},
+    		{"Mistral V3",
+    			"[INST] ",
+    			"\\n\\n{{FIRST MESSAGE HERE}}[/INST] ",
+    			"[INST] ",
+    			"[/INST] ",
+    			"</s>"
+    		},
+    		{"Mistral V3-Tekken",
+    			"[INST]",
+    			"\\n\\n{{FIRST MESSAGE HERE}}[/INST]",
+    			"[INST]",
+    			"[/INST]",
+    			"</s>"
+    		},
+    		{"Mistral V7",
+    			"[SYSTEM_PROMPT] ",
+    			"[/SYSTEM_PROMPT]",
+    			"[INST] ",
+    			"[/INST] ",
+    			"</s>"
+    		},
+    		{"Phi 3",
+    			"<|system|>\\n",
+    			"<|end|>\\n",
+    			"<|user|>\\n",
+    			"<|end|>\\n<|assistant|>\\n",
+    			"<|end|>"
+    		},
+    		{"Phi 4",
+    			"<|im_start|>system<|im_sep|>",
+    			"<|im_end|>",
+    			"<|im_start|>user<|im_sep|>",
+    			"<|im_end|><|im_start|>assistant<|im_sep|>",
+    			"<|im_end|>"
+    		},
+    		{"Vicuna",
+    			"SYSTEM: ",
+    			"\\n",
+    			"USER: ",
+    			"\\nASSISTANT: ",
+    			"</s>"
+    		}
     };
-        
+
     // Template field indices
     public static final int TEMPLATE_NAME_INDEX = 0;
     public static final int TEMPLATE_SYS_PREFIX_INDEX = 1;
@@ -189,13 +301,14 @@ public class Constants {
     public static final int TEMPLATE_INST_SUFFIX_INDEX = 4;
     public static final int TEMPLATE_EOS_INDEX = 5;
     
-    // Default template values (ChatML)
-    public static final String DEFAULT_TEMPLATE_NAME = INSTRUCTION_TEMPLATES[0][TEMPLATE_NAME_INDEX];
-    public static final String DEFAULT_TEMPLATE_SYS_PREFIX = INSTRUCTION_TEMPLATES[0][TEMPLATE_SYS_PREFIX_INDEX];
-    public static final String DEFAULT_TEMPLATE_SYS_SUFFIX = INSTRUCTION_TEMPLATES[0][TEMPLATE_SYS_SUFFIX_INDEX];
-    public static final String DEFAULT_TEMPLATE_INST_PREFIX = INSTRUCTION_TEMPLATES[0][TEMPLATE_INST_PREFIX_INDEX];
-    public static final String DEFAULT_TEMPLATE_INST_SUFFIX = INSTRUCTION_TEMPLATES[0][TEMPLATE_INST_SUFFIX_INDEX];
-    public static final String DEFAULT_TEMPLATE_EOS = INSTRUCTION_TEMPLATES[0][TEMPLATE_EOS_INDEX];
+    // Default template values
+    public static final int DEFAULT_TEMPLATE_INDEX = 1;  // ChatML
+    public static final String DEFAULT_TEMPLATE_NAME = INSTRUCTION_TEMPLATES[DEFAULT_TEMPLATE_INDEX][TEMPLATE_NAME_INDEX];
+    public static final String DEFAULT_TEMPLATE_SYS_PREFIX = INSTRUCTION_TEMPLATES[DEFAULT_TEMPLATE_INDEX][TEMPLATE_SYS_PREFIX_INDEX];
+    public static final String DEFAULT_TEMPLATE_SYS_SUFFIX = INSTRUCTION_TEMPLATES[DEFAULT_TEMPLATE_INDEX][TEMPLATE_SYS_SUFFIX_INDEX];
+    public static final String DEFAULT_TEMPLATE_INST_PREFIX = INSTRUCTION_TEMPLATES[DEFAULT_TEMPLATE_INDEX][TEMPLATE_INST_PREFIX_INDEX];
+    public static final String DEFAULT_TEMPLATE_INST_SUFFIX = INSTRUCTION_TEMPLATES[DEFAULT_TEMPLATE_INDEX][TEMPLATE_INST_SUFFIX_INDEX];
+    public static final String DEFAULT_TEMPLATE_EOS = INSTRUCTION_TEMPLATES[DEFAULT_TEMPLATE_INDEX][TEMPLATE_EOS_INDEX];
     
     /**
      * Gets template names for dropdown
